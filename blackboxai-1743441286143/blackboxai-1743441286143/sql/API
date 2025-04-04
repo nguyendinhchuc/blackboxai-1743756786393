@@ -1,0 +1,53 @@
+
+POST http://localhost:8080/ecommerce/api/auth/signin
+
+###
+
+POST http://localhost:8080/ecommerce/api/auth/signup
+
+###
+
+POST http://localhost:8080/ecommerce/api/categories
+
+###
+
+GET http://localhost:8080/ecommerce/api/categories/root
+
+###
+
+PUT http://localhost:8080/ecommerce/api/categories/{id}
+
+###
+
+GET http://localhost:8080/ecommerce/api/categories/{id}/subcategories
+
+###
+
+POST http://localhost:8080/ecommerce/api/payments
+
+###
+
+GET http://localhost:8080/ecommerce/api/products
+
+###
+
+GET http://localhost:8080/ecommerce/api/products/category/{categoryId}
+
+###
+
+DELETE http://localhost:8080/ecommerce/api/products/{id}
+
+###
+
+POST http://localhost:8080/ecommerce/api/tenants
+
+###
+
+GET http://localhost:8080/ecommerce/api/tenants/domain/{domain}
+
+###
+
+GET http://localhost:8080/ecommerce/test
+
+###
+
