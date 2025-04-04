@@ -34,6 +34,7 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+    @CrossOrigin(origins = "https://y7lfq3-8000.csb.app")
     @GetMapping("/verify")
     public ResponseEntity<?> verifyToken(@RequestHeader("Authorization") String authHeader) {
         try {
