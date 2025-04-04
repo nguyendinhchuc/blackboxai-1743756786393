@@ -20,6 +20,9 @@ public class Payment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "tenant_id")
+    private Long tenantId;
+
     private BigDecimal amount;
     private String paymentMethod;
     private String transactionId;

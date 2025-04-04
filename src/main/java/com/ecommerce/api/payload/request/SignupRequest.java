@@ -22,6 +22,16 @@ public class SignupRequest {
 
     private Set<String> roles;
 
+    private Long tenantId;
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
     public String getUsername() {
         return username;
     }

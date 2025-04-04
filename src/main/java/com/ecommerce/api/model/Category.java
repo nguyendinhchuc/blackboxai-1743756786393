@@ -23,4 +23,7 @@ public class Category {
     private Category parentCategory;
 
     private String imageUrl;
+
+    @Column(name = "tenant_id")
+    private Long tenantId;
 }
