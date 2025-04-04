@@ -12,11 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = {"https://y7lfq3-8000.csb.app", "http://localhost:8000", "http://localhost:3000"}, 
-            allowedHeaders = {"Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"},
-            exposedHeaders = {"Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"},
-            methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
-            maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
