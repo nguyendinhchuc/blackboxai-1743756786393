@@ -47,7 +47,7 @@ public class SecurityConfig {
         configuration.addAllowedOrigin("https://y7lfq3-8000.csb.app"); // Specific origin
         configuration.addAllowedMethod("*"); // Allow all methods
         configuration.addAllowedHeader("*"); // Allow all headers
-        configuration.setAllowCredentials(false); // Set to false when using specific origin
+        configuration.setAllowCredentials(true); // Required for Bearer token authentication
         configuration.setMaxAge(3600L); // Cache preflight for 1 hour
         
         // Add specific exposed headers if needed
