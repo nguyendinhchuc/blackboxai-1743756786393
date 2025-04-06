@@ -33,24 +33,4 @@ public class AuthController {
         authService.registerUser(signUpRequest);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
-
-    @CrossOrigin
-    @GetMapping("/verify")
-    public ResponseEntity<?> verifyToken(@RequestHeader("Authorization") String authHeader) {
-        try {
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
-                boolean isValid = jwtUtils.validateJwtToken(token);
-                
-                if (isValid) {
-                    String username = jwtUtils.getUserNameFromJwtToken(token);
-                    return ResponseEntity.ok(new MessageResponse("Token is valid for user: " + username));
-                }
-            }
-            return ResponseEntity.badRequest().body(new MessageResponse("Invalid token"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error verifying token: " + e.getMessage()));
-        }
-    }
-
 }
