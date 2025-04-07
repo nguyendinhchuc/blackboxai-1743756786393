@@ -3,13 +3,13 @@ package com.ecommerce.api.service;
 import com.ecommerce.api.model.Role;
 import com.ecommerce.api.model.RoleEnum;
 import com.ecommerce.api.model.User;
+import com.ecommerce.api.model.UserDetailsImpl;
 import com.ecommerce.api.payload.request.LoginRequest;
 import com.ecommerce.api.payload.request.SignupRequest;
 import com.ecommerce.api.payload.response.JwtResponse;
 import com.ecommerce.api.repository.RoleRepository;
 import com.ecommerce.api.repository.UserRepository;
 import com.ecommerce.api.security.JwtUtils;
-import com.ecommerce.api.security.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,11 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthService {

@@ -1,3 +1,4 @@
+
 -- Create roles table
 CREATE TABLE roles (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -111,16 +112,6 @@ CREATE TABLE banners (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
-);
-
--- Insert sample data
--- Migrate existing user roles (transfer the first role for each user)
-UPDATE users u 
-SET role_id = (
-    SELECT ur.role_id 
-    FROM user_roles ur 
-    WHERE ur.user_id = u.id 
-    LIMIT 1
 );
 
 -- Drop the user_roles table after migration

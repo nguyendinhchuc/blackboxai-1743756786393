@@ -39,7 +39,7 @@ public class User {
     @Column(name = "tenant_id")
     private Long tenantId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
 

@@ -1,5 +1,6 @@
 package com.ecommerce.api.security;
 
+import com.ecommerce.api.model.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
