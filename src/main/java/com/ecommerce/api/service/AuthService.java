@@ -51,16 +51,17 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();        
-        List<String> roles = userDetails.getAuthorities().stream()
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
                 .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+                .orElse(RoleEnum.ROLE_USER.name());
 
-        return new JwtResponse(jwt, 
-                             userDetails.getId(), 
-                             userDetails.getUsername(), 
-                             userDetails.getEmail(), 
-                             roles);
+        return new JwtResponse(jwt,
+                             userDetails.getId(),
+                             userDetails.getUsername(),
+                             userDetails.getEmail(),
+                             role);
     }
 
     public void registerUser(SignupRequest signUpRequest) {
@@ -72,18 +73,27 @@ public class AuthService {
             throw new RuntimeException("Error: Email is already in use!");
         }
 
-        // Create new user's account
+        // Get role from request or use default ROLE_USER
+        Role role;
+        if (signUpRequest.getRole() != null) {
+            try {
+                RoleEnum roleEnum = RoleEnum.valueOf(signUpRequest.getRole());
+                role = roleRepository.findByName(roleEnum)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Error: Invalid role specified.");
+            }
+        } else {
+            role = roleRepository.findByName(RoleEnum.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: Default role not found."));
+        }
+
         User user = new User(signUpRequest.getUsername(), 
                            signUpRequest.getEmail(),
-                           passwordEncoder.encode(signUpRequest.getPassword()));
+                           passwordEncoder.encode(signUpRequest.getPassword()),
+                           signUpRequest.getTenantId(),
+                           role);
 
-        Set<Role> roles = new HashSet<>();
-        
-        Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        roles.add(userRole);
-
-        user.setRoles(roles);
         userRepository.save(user);
     }
 }

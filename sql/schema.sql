@@ -13,17 +13,15 @@ CREATE TABLE users (
   email VARCHAR(50) NOT NULL,
   password VARCHAR(120) NOT NULL,
   tenant_id BIGINT,
+  role_id INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT uk_users_username UNIQUE (username),
-  CONSTRAINT uk_users_email UNIQUE (email)
+  CONSTRAINT uk_users_email UNIQUE (email),
+  CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
--- Add role_id column to users table
-ALTER TABLE users ADD COLUMN role_id INT;
-ALTER TABLE users ADD CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(id);
-
--- Add index for better performance
+-- Add indexes for better performance
 CREATE INDEX idx_users_tenant ON users(tenant_id);
 CREATE INDEX idx_users_role ON users(role_id);
 
@@ -116,6 +114,18 @@ CREATE TABLE banners (
 );
 
 -- Insert sample data
+-- Migrate existing user roles (transfer the first role for each user)
+UPDATE users u 
+SET role_id = (
+    SELECT ur.role_id 
+    FROM user_roles ur 
+    WHERE ur.user_id = u.id 
+    LIMIT 1
+);
+
+-- Drop the user_roles table after migration
+DROP TABLE IF EXISTS user_roles;
+
 INSERT INTO roles (name) VALUES 
 ('ROLE_USER'),
 ('ROLE_MODERATOR'),
