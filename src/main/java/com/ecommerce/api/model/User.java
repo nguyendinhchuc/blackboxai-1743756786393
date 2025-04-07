@@ -39,11 +39,9 @@ public class User {
     @Column(name = "tenant_id")
     private Long tenantId;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     public User() {}
 
@@ -53,10 +51,11 @@ public class User {
         this.password = password;
     }
 
-    public User(String username, String email, String password, Long tenantId) {
+    public User(String username, String email, String password, Long tenantId, Role role) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.tenantId = tenantId;
+        this.role = role;
     }
 }

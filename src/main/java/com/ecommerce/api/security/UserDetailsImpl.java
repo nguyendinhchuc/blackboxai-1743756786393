@@ -1,10 +1,12 @@
 package com.ecommerce.api.security;
 
 import com.ecommerce.api.model.User;
+import com.ecommerce.api.model.RoleEnum;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,9 +28,13 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-                .collect(Collectors.toList());
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if (user.getRole() != null && user.getRole().getName() != null) {
+            authorities.add(new SimpleGrantedAuthority(user.getRole().getName().name()));
+        } else {
+            // If no role found, add default ROLE_USER
+            authorities.add(new SimpleGrantedAuthority(RoleEnum.ROLE_USER.name()));
+        }
 
         return new UserDetailsImpl(
                 user.getId(),
