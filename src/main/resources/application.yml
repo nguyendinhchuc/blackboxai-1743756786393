@@ -1,0 +1,185 @@
+spring:
+  application:
+    name: ecommerce-api
+  datasource:
+    url: jdbc:mysql://localhost:3306/ecommerce?useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        enable_lazy_load_no_trans: true
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    time-zone: UTC
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+jwt:
+  secret: your-secret-key
+  expiration: 86400000 # 24 hours
+  header: Authorization
+  prefix: Bearer
+
+cors:
+  allowed-origins: "*"
+  allowed-methods: "*"
+  allowed-headers: "*"
+  exposed-headers: "Authorization"
+  allow-credentials: true
+  max-age: 3600
+
+revision:
+  # Retention configuration
+  retention-period: 180 # days
+  max-revisions-per-entity: 100
+  
+  # Tracking configuration
+  track-collection-changes: true
+  track-transient-fields: false
+  track-lazy-fields: false
+  excluded-fields:
+    - password
+    - secretKey
+    - token
+  store-full-state: false
+  
+  # Compression configuration
+  compress-data: true
+  compression-threshold: 1024 # bytes
+  
+  # Cleanup schedules
+  cleanup-schedule: "0 0 0 * * ?" # Daily at midnight
+  excess-cleanup-schedule: "0 0 1 * * ?" # Daily at 1 AM
+  stats-schedule: "0 0 2 * * ?" # Daily at 2 AM
+  compression-schedule: "0 0 3 * * ?" # Daily at 3 AM
+  
+  # Async configuration
+  async:
+    core-pool-size: 2
+    max-pool-size: 5
+    queue-capacity: 500
+    thread-name-prefix: "RevisionAsync-"
+    timeout: 60 # seconds
+
+  # Notification configuration
+  notification:
+    email:
+      host: smtp.gmail.com
+      port: 587
+      username: ${SMTP_USERNAME:}
+      password: ${SMTP_PASSWORD:}
+      from: noreply@example.com
+      enabled: true
+      protocol: smtp
+      auth: true
+      starttls: true
+      timeout: 5000
+      properties:
+        mail.smtp.ssl.trust: smtp.gmail.com
+        mail.smtp.connectiontimeout: 5000
+        mail.smtp.writetimeout: 5000
+        mail.smtp.from: noreply@example.com
+
+    recipients:
+      admins:
+        - admin@example.com
+      developers:
+        - dev@example.com
+      managers:
+        - manager@example.com
+      auditors:
+        - auditor@example.com
+
+    templates:
+      base-dir: templates/notification/
+      suffix: .html
+      encoding: UTF-8
+      cache: true
+      cache-timeout: 3600
+
+    levels:
+      error: true
+      warning: true
+      info: true
+      debug: false
+      max-retries: 3
+      retry-delay: 1000
+
+logging:
+  level:
+    root: INFO
+    com.ecommerce.api: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+cache:
+  config:
+    ttl: 3600 # seconds
+    max-entries: 1000
+
+security:
+  require-ssl: false
+  basic:
+    enabled: false
+  ignored: /api/public/**
+
+app:
+  upload:
+    dir: uploads
+    allowed-types:
+      - image/jpeg
+      - image/png
+      - image/gif
+    max-file-size: 5242880 # 5MB
+  pagination:
+    default-page-size: 20
+    max-page-size: 100
+  date-format: "yyyy-MM-dd HH:mm:ss"
+  timezone: UTC
+  admin:
+    default-username: admin
+    default-password: admin123
+  session:
+    timeout: 1800 # 30 minutes
+    max-concurrent: 5
+  audit:
+    enabled: true
+    log-request-body: false
+    log-response-body: false
+    excluded-paths:
+      - /api/health
+      - /api/metrics
+  notification:
+    email:
+      enabled: true
+      from: noreply@example.com
+    sms:
+      enabled: false
+  feature-flags:
+    enable-swagger: true
+    enable-actuator: true
+    enable-cors: true
+    enable-cache: true
+    enable-compression: true

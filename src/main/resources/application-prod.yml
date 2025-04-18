@@ -1,0 +1,205 @@
+spring:
+  application:
+    name: ecommerce-api
+  datasource:
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 120000
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        enable_lazy_load_no_trans: true
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    time-zone: UTC
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 10
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+  header: Authorization
+  prefix: Bearer
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://your-production-domain.com}
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: Origin,Content-Type,Accept,Authorization
+  exposed-headers: Authorization
+  allow-credentials: false
+  max-age: 3600
+
+revision:
+  # Retention configuration
+  retention-period: 180
+  max-revisions-per-entity: 100
+  
+  # Tracking configuration
+  track-collection-changes: true
+  track-transient-fields: false
+  track-lazy-fields: false
+  excluded-fields:
+    - password
+    - secretKey
+    - token
+  store-full-state: false
+  
+  # Compression configuration
+  compress-data: true
+  compression-threshold: 1024
+  
+  # Cleanup schedules
+  cleanup-schedule: "0 0 0 * * ?"
+  excess-cleanup-schedule: "0 0 1 * * ?"
+  stats-schedule: "0 0 2 * * ?"
+  compression-schedule: "0 0 3 * * ?"
+  
+  # Async configuration
+  async:
+    core-pool-size: 4
+    max-pool-size: 8
+    queue-capacity: 1000
+    thread-name-prefix: "RevisionAsync-"
+    timeout: 60
+
+  # Notification configuration
+  notification:
+    email:
+      host: ${SMTP_HOST:smtp.gmail.com}
+      port: ${SMTP_PORT:587}
+      username: ${SMTP_USERNAME}
+      password: ${SMTP_PASSWORD}
+      from: ${SMTP_FROM:noreply@your-production-domain.com}
+      enabled: true
+      protocol: smtp
+      auth: true
+      starttls: true
+      timeout: 5000
+      properties:
+        mail.smtp.ssl.trust: ${SMTP_HOST:smtp.gmail.com}
+        mail.smtp.connectiontimeout: 5000
+        mail.smtp.writetimeout: 5000
+        mail.smtp.from: ${SMTP_FROM:noreply@your-production-domain.com}
+
+    recipients:
+      admins:
+        - ${ADMIN_EMAIL:admin@your-production-domain.com}
+      developers:
+        - ${DEV_EMAIL:dev@your-production-domain.com}
+      managers:
+        - ${MANAGER_EMAIL:manager@your-production-domain.com}
+      auditors:
+        - ${AUDITOR_EMAIL:auditor@your-production-domain.com}
+
+    templates:
+      base-dir: templates/notification/
+      suffix: .html
+      encoding: UTF-8
+      cache: true
+      cache-timeout: 3600
+
+    levels:
+      error: true
+      warning: true
+      info: true
+      debug: false
+      max-retries: 3
+      retry-delay: 1000
+
+logging:
+  level:
+    root: WARN
+    com.ecommerce.api: INFO
+    org.springframework.web: WARN
+    org.hibernate: WARN
+  file:
+    name: /var/log/ecommerce-api/application.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  health:
+    defaults:
+      enabled: true
+
+cache:
+  config:
+    ttl: 3600
+    max-entries: 2000
+
+security:
+  require-ssl: false
+  basic:
+    enabled: false
+  ignored: /api/public/**
+
+app:
+  upload:
+    dir: ${APP_UPLOAD_DIR:/var/ecommerce-api/uploads}
+    allowed-types:
+      - image/jpeg
+      - image/png
+      - image/gif
+    max-file-size: 5242880
+  pagination:
+    default-page-size: 20
+    max-page-size: 100
+  date-format: "yyyy-MM-dd HH:mm:ss"
+  timezone: UTC
+  session:
+    timeout: 1800
+    max-concurrent: 5
+  audit:
+    enabled: true
+    log-request-body: false
+    log-response-body: false
+    excluded-paths:
+      - /api/health
+      - /api/metrics
+      - /actuator/**
+  notification:
+    email:
+      enabled: true
+      from: ${SMTP_FROM:noreply@your-production-domain.com}
+    sms:
+      enabled: false
+  feature-flags:
+    enable-swagger: false
+    enable-actuator: true
+    enable-cors: true
+    enable-cache: true
+    enable-compression: true

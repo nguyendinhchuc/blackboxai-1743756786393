@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  ecommerce-api:
+    build: .
+    container_name: ecommerce-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JDBC_DATABASE_URL=jdbc:mysql://mysql:3306/ecommerce?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - JDBC_DATABASE_USERNAME=ecommerce_user
+      - JDBC_DATABASE_PASSWORD=ecommerce_password
+      - JWT_SECRET=8L$yG2mX9pF7zQ4wR1vT5sA3eD6oJ0uI8bN7cX2vZ1aS5dF9gH3jK4lP6mN0qR5
+      - PORT=8080
+      - CORS_ALLOWED_ORIGINS=*
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=noreply@your-production-domain.com
+    volumes:
+      - app-logs:/var/log/ecommerce-api
+      - app-uploads:/var/ecommerce-api/uploads
+    restart: always
+    networks:
+      - ecommerce-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: ecommerce-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=ecommerce
+      - MYSQL_USER=ecommerce_user
+      - MYSQL_PASSWORD=ecommerce_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    restart: always
+    networks:
+      - ecommerce-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  app-logs:
+  app-uploads:

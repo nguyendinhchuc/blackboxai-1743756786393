@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout/admin-layout :: html(~{::content})">
+<th:block th:fragment="content">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-semibold text-gray-800">Active Sessions</h1>
+        <p class="text-gray-600">Manage your active login sessions across devices</p>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+        <span class="block sm:inline" th:text="${success}">Success message here</span>
+    </div>
+    
+    <div th:if="${error}" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <span class="block sm:inline" th:text="${error}">Error message here</span>
+    </div>
+
+    <!-- Current Session -->
+    <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+        <div class="p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Current Session</h2>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-desktop text-green-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">
+                            This Device
+                            <span class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Active Now</span>
+                        </div>
+                        <div class="text-sm text-gray-500" th:text="${currentSession?.browser + ' on ' + currentSession?.platform}">
+                            Chrome on Windows
+                        </div>
+                        <div class="text-xs text-gray-400" th:text="${'IP: ' + currentSession?.ipAddress}">
+                            IP: 192.168.1.1
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Active Sessions -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-900">Other Active Sessions</h2>
+                <form th:action="@{/admin/profile/sessions/revoke-all}" method="POST" 
+                      onsubmit="return confirm('Are you sure you want to revoke all other sessions?');">
+                    <button type="submit" 
+                            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Sign Out All Other Sessions
+                    </button>
+                </form>
+            </div>
+
+            <!-- Sessions List -->
+            <div class="space-y-4">
+                <div th:each="session : ${sessions}" 
+                     th:unless="${session.isCurrentSession}"
+                     class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-mobile-alt text-blue-600" 
+                               th:if="${session.deviceType == 'MOBILE'}"></i>
+                            <i class="fas fa-desktop text-blue-600" 
+                               th:if="${session.deviceType == 'DESKTOP'}"></i>
+                            <i class="fas fa-tablet-alt text-blue-600" 
+                               th:if="${session.deviceType == 'TABLET'}"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">
+                                <span th:text="${session.browser + ' on ' + session.platform}">
+                                    Chrome on Windows
+                                </span>
+                                <span th:if="${session.active}" 
+                                      class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                                    Active
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                <span th:text="${'Last active: ' + session.lastActiveTime}">
+                                    Last active: 2 hours ago
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                <span th:text="${'IP: ' + session.ipAddress}">IP: 192.168.1.1</span>
+                                <span th:text="${' • Location: ' + session.location}"
+                                      th:if="${session.location}">
+                                    • Location: New York, US
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <form th:action="@{/admin/profile/sessions/revoke}" method="POST">
+                        <input type="hidden" name="sessionId" th:value="${session.id}">
+                        <button type="submit" 
+                                class="text-red-600 hover:text-red-900"
+                                onclick="return confirm('Are you sure you want to revoke this session?');">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(sessions) || sessions.size() == 1}" 
+                     class="text-center py-8 text-gray-500">
+                    <i class="fas fa-check-circle text-3xl mb-2"></i>
+                    <p>No other active sessions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Security Tips -->
+    <div class="mt-6 bg-blue-50 rounded-lg p-6">
+        <h3 class="text-lg font-medium text-blue-900 mb-2">Security Tips</h3>
+        <ul class="list-disc list-inside text-blue-800 space-y-2">
+            <li>Sign out from devices you no longer use</li>
+            <li>Regularly review your active sessions</li>
+            <li>Enable two-factor authentication for additional security</li>
+            <li>Use unique passwords for different accounts</li>
+        </ul>
+    </div>
+</th:block>
+</html>

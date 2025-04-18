@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cleanup Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #17a2b8;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .content {
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .cleanup-icon {
+            font-size: 36px;
+            margin-right: 15px;
+        }
+        .timestamp {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 10px;
+        }
+        .summary {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #17a2b8;
+            margin: 10px 0;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .details {
+            margin: 20px 0;
+        }
+        .details table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .details th, .details td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .details th {
+            background-color: #f8f9fa;
+            font-weight: normal;
+            color: #6c757d;
+        }
+        .reason {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .recommendations {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .chart {
+            width: 100%;
+            height: 200px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="cleanup-icon">🧹</span>
+        <div>
+            <h2 style="margin: 0;">Cleanup Report</h2>
+            <div class="timestamp">
+                <span th:text="${#temporals.format(timestamp, 'yyyy-MM-dd HH:mm:ss')}">
+                    Timestamp
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="summary">
+            <h3>Cleanup Summary</h3>
+            <p>
+                A total of <strong th:text="${deletedCount}">0</strong> revisions were 
+                cleaned up during this maintenance operation.
+            </p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number" th:text="${deletedCount}">0</div>
+                <div class="stat-label">Revisions Deleted</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" 
+                    th:text="${#numbers.formatDecimal(spaceFreed / 1024.0, 1, 2)}">0</div>
+                <div class="stat-label">Space Freed (KB)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" 
+                    th:text="${#numbers.formatDecimal(executionTime / 1000.0, 1, 2)}">0</div>
+                <div class="stat-label">Execution Time (s)</div>
+            </div>
+        </div>
+
+        <div class="reason">
+            <h3>Cleanup Reason</h3>
+            <p th:text="${reason}">Cleanup reason</p>
+        </div>
+
+        <div class="details">
+            <h3>Cleanup Details</h3>
+            <table>
+                <tr>
+                    <th>Start Time</th>
+                    <td th:text="${#temporals.format(timestamp, 'yyyy-MM-dd HH:mm:ss')}">
+                        Start Time
+                    </td>
+                </tr>
+                <tr>
+                    <th>End Time</th>
+                    <td th:text="${#temporals.format(timestamp.plusSeconds(
+                        executionTime/1000), 'yyyy-MM-dd HH:mm:ss')}">End Time</td>
+                </tr>
+                <tr>
+                    <th>Total Revisions Processed</th>
+                    <td th:text="${totalProcessed}">0</td>
+                </tr>
+                <tr>
+                    <th>Deletion Rate</th>
+                    <td th:text="${#numbers.formatDecimal(
+                        (deletedCount * 1.0 / executionTime) * 1000, 1, 2)} + ' per second'">
+                        0 per second
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="recommendations">
+            <h3>Recommendations</h3>
+            <ul>
+                <li>Review the cleanup results to ensure no critical data was removed</li>
+                <li>Consider adjusting retention policies if cleanup frequency is too high</li>
+                <li>Monitor system performance for improvements after cleanup</li>
+                <li>Schedule regular maintenance windows for future cleanups</li>
+            </ul>
+        </div>
+
+        <div class="chart">
+            <p style="color: #6c757d;">Cleanup Statistics Chart</p>
+            <!-- Placeholder for future chart implementation -->
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>
+            This is an automated report from the Revision Management System. 
+            Please do not reply to this email.
+        </p>
+        <p>
+            If you have any questions about this cleanup operation, please contact 
+            your system administrator.
+        </p>
+        <p>
+            Report ID: <span th:text="${'CLN-' + timestamp.toEpochSecond()}">ID</span>
+        </p>
+    </div>
+</body>
+</html>
