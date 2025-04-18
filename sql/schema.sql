@@ -13,6 +13,8 @@ CREATE TABLE users (
   username VARCHAR(20) NOT NULL,
   email VARCHAR(50) NOT NULL,
   password VARCHAR(120) NOT NULL,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
   tenant_id BIGINT,
   role_id INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
