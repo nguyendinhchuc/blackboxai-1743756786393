@@ -116,15 +116,15 @@ public class CacheConfig {
     /**
      * Configure cache metrics reporter
      */
-    @Bean
-    public com.github.benmanes.caffeine.cache.stats.CacheStats cacheMetrics(CacheManager cacheManager) {
-        CaffeineCacheManager caffeineCacheManager = (CaffeineCacheManager) cacheManager;
-        return caffeineCacheManager.getCacheNames().stream()
-            .map(caffeineCacheManager::getCache)
-            .map(cache -> ((com.github.benmanes.caffeine.cache.Cache<?, ?>) cache.getNativeCache()).stats())
-            .reduce(new com.github.benmanes.caffeine.cache.stats.CacheStats(0, 0, 0, 0, 0, 0, 0),
-                com.github.benmanes.caffeine.cache.stats.CacheStats::plus);
-    }
+//    @Bean
+//    public com.github.benmanes.caffeine.cache.stats.CacheStats cacheMetrics(CacheManager cacheManager) {
+//        CaffeineCacheManager caffeineCacheManager = (CaffeineCacheManager) cacheManager;
+//        return caffeineCacheManager.getCacheNames().stream()
+//            .map(caffeineCacheManager::getCache)
+//            .map(cache -> ((com.github.benmanes.caffeine.cache.Cache<?, ?>) cache.getNativeCache()).stats())
+//            .reduce(new com.github.benmanes.caffeine.cache.stats.CacheStats(0, 0, 0, 0, 0, 0, 0),
+//                com.github.benmanes.caffeine.cache.stats.CacheStats::plus);
+//    }
 
     /**
      * Cache key generator for complex keys

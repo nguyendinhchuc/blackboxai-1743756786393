@@ -35,7 +35,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Handle validation exceptions
      */
-    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
             HttpHeaders headers,
@@ -154,10 +153,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Handle session related exceptions
      */
-    @ExceptionHandler({
-        org.springframework.security.web.session.InvalidSessionException.class,
-        org.springframework.security.web.session.SessionAuthenticationException.class
-    })
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<Object> handleSessionException(Exception ex) {
         Map<String, Object> body = new HashMap<>();

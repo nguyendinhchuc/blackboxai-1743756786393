@@ -1,5 +1,6 @@
 package com.ecommerce.api.controller.admin;
 
+import com.ecommerce.api.repository.UserRepository;
 import com.ecommerce.api.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

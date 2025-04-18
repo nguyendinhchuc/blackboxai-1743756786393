@@ -50,7 +50,6 @@ public class AuditConfig {
      * Custom auditor resolver that can handle different types of authentication principals
      */
     class CustomAuditorResolver {
-        
         public String resolveAuditor(Authentication authentication) {
             if (authentication == null || !authentication.isAuthenticated()) {
                 return "system";
@@ -72,12 +71,9 @@ public class AuditConfig {
             }
 
             // Handle OAuth2 authentication
-            if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
-                return ((org.springframework.security.oauth2.core.user.OAuth2User) principal)
-                    .getAttributeyes("email");
-            }
-("email");
-            }
+//            if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+//                return ((org.springframework.security.oauth2.core.user.OAuth2User) principal).getAttributeyes("email");
+//            }
 
             return authentication.getName();
         }
@@ -142,7 +138,7 @@ public class AuditConfig {
         return new CustomRevisionListener();
     }
 
-    class CustomRevisionListener implements org.hibernate.envers.RevisionListener {
+    public class CustomRevisionListener implements org.hibernate.envers.RevisionListener {
         private static final Logger logger = Logger.getLogger(CustomRevisionListener.class.getName());
         
         @Override

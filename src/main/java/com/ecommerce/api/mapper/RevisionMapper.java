@@ -3,6 +3,7 @@ package com.ecommerce.api.mapper;
 import com.ecommerce.api.dto.RevisionDTO;
 import com.ecommerce.api.model.Revision;
 import org.mapstruct.*;
+import org.springframework.data.domain.Page;
 
 @Mapper(
     componentModel = "spring",
@@ -112,9 +113,11 @@ public interface RevisionMapper extends BaseMapper<Revision, RevisionDTO> {
     /**
      * Map page of entities
      */
-    @IterableMapping(qualifiedByName = "safeMap")
-    org.springframework.data.domain.Page<RevisionDTO> mapPage(
-        org.springframework.data.domain.Page<Revision> page);
+//    @IterableMapping(qualifiedByName = "safeMap")
+//    Page<RevisionDTO> mapPage(Page<Revision> page);
+    default Page<RevisionDTO> mapPage(Page<Revision> page) {
+        return page.map(this::toDto);
+    }
 
     /**
      * Map list of entities

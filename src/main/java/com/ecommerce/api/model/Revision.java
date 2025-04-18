@@ -1,5 +1,6 @@
 package com.ecommerce.api.model;
 
+import com.ecommerce.api.config.AuditConfig;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.RevisionEntity;
@@ -15,10 +16,10 @@ import java.util.Map;
 
 @Entity
 @Table(name = "revisions")
-@RevisionEntity(com.ecommerce.api.config.AuditConfig.CustomRevisionListener.class)
+@RevisionEntity(AuditConfig.CustomRevisionListener.class)
 @Getter
 @Setter
-public class Revision implements Serializable {
+public class Revision extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 

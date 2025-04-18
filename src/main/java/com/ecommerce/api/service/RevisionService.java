@@ -2,6 +2,7 @@ package com.ecommerce.api.service;
 
 import com.ecommerce.api.dto.RevisionDTO;
 import com.ecommerce.api.exception.CustomException;
+import com.ecommerce.api.mapper.RevisionMapper;
 import com.ecommerce.api.model.Revision;
 import com.ecommerce.api.repository.RevisionRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +24,17 @@ import java.util.stream.Collectors;
 public class RevisionService {
 
     private final RevisionRepository revisionRepository;
+    private final RevisionMapper revisionMapper;
 
     /**
      * Create a new revision
      */
     @Transactional
-    public RevisionDTO createRevision(String entityName, Long entityId, 
-                                    Revision.RevisionType revisionType,
-                                    Map<String, Object> changes, 
-                                    String reason,
-                                    HttpServletRequest request) {
+    public RevisionDTO createRevision(String entityName, Long entityId,
+                                      Revision.RevisionType revisionType,
+                                      Map<String, Object> changes,
+                                      String reason,
+                                      HttpServletRequest request) {
         Revision revision = new Revision();
         revision.setEntityName(entityName);
         revision.setEntityId(entityId);
@@ -40,14 +42,14 @@ public class RevisionService {
         revision.setChangesFromMap(changes);
         revision.setReason(reason);
         revision.setTimestamp(System.currentTimeMillis());
-        
+
         // Set request information
         if (request != null) {
             revision.setIpAddress(getClientIp(request));
             revision.setUserAgent(request.getHeader("User-Agent"));
         }
 
-        return revisionRepository.save(revision).toDTO();
+        return revisionMapper.toDto(revisionRepository.save(revision));
     }
 
     /**
@@ -56,8 +58,8 @@ public class RevisionService {
     @Transactional(readOnly = true)
     public RevisionDTO getRevision(Long id) {
         return revisionRepository.findById(id)
-            .map(Revision::toDTO)
-            .orElseThrow(() -> new CustomException.ResourceNotFoundException("Revision", "id", id));
+                .map(revisionMapper::toDto)
+                .orElseThrow(() -> new CustomException.ResourceNotFoundException("Revision", "id", id));
     }
 
     /**
@@ -65,10 +67,7 @@ public class RevisionService {
      */
     @Transactional(readOnly = true)
     public List<RevisionDTO> getRevisionsByEntity(String entityName, Long entityId) {
-        return revisionRepository.findByEntityNameAndEntityId(entityName, entityId)
-            .stream()
-            .map(Revision::toDTO)
-            .collect(Collectors.toList());
+        return revisionMapper.mapList(revisionRepository.findByEntityNameAndEntityId(entityName, entityId));
     }
 
     /**
@@ -76,8 +75,7 @@ public class RevisionService {
      */
     @Transactional(readOnly = true)
     public Page<RevisionDTO> getRevisionsByEntity(String entityName, Long entityId, Pageable pageable) {
-        return revisionRepository.findByEntityNameAndEntityId(entityName, entityId, pageable)
-            .map(Revision::toDTO);
+        return revisionMapper.mapPage(revisionRepository.findByEntityNameAndEntityId(entityName, entityId, pageable));
     }
 
     /**
@@ -85,10 +83,7 @@ public class RevisionService {
      */
     @Transactional(readOnly = true)
     public List<RevisionDTO> getRevisionsByUsername(String username) {
-        return revisionRepository.findByUsername(username)
-            .stream()
-            .map(Revision::toDTO)
-            .collect(Collectors.toList());
+        return revisionMapper.mapList(revisionRepository.findByUsername(username));
     }
 
     /**
@@ -98,11 +93,8 @@ public class RevisionService {
     public List<RevisionDTO> getRevisionsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         long startTimestamp = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         long endTimestamp = endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        
-        return revisionRepository.findByDateRange(startTimestamp, endTimestamp)
-            .stream()
-            .map(Revision::toDTO)
-            .collect(Collectors.toList());
+
+        return revisionMapper.mapList(revisionRepository.findByDateRange(startTimestamp, endTimestamp));
     }
 
     /**
@@ -110,10 +102,7 @@ public class RevisionService {
      */
     @Transactional(readOnly = true)
     public List<RevisionDTO> getRevisionsByType(Revision.RevisionType revisionType) {
-        return revisionRepository.findByRevisionType(revisionType)
-            .stream()
-            .map(Revision::toDTO)
-            .collect(Collectors.toList());
+        return revisionMapper.mapList(revisionRepository.findByRevisionType(revisionType));
     }
 
     /**
@@ -124,9 +113,9 @@ public class RevisionService {
         Revision revision = revisionRepository.findLatestRevision(entityName, entityId);
         if (revision == null) {
             throw new CustomException.ResourceNotFoundException(
-                String.format("No revisions found for %s with id %d", entityName, entityId));
+                    String.format("No revisions found for %s with id %d", entityName, entityId));
         }
-        return revision.toDTO();
+        return revisionMapper.toDto(revision);
     }
 
     /**
@@ -141,15 +130,15 @@ public class RevisionService {
             LocalDateTime startDate,
             LocalDateTime endDate,
             Pageable pageable) {
-        
-        Long startTimestamp = startDate != null ? 
-            startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
-        Long endTimestamp = endDate != null ? 
-            endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
+
+        Long startTimestamp = startDate != null ?
+                startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
+        Long endTimestamp = endDate != null ?
+                endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
 
         return revisionRepository.findByMultipleCriteria(
-            entityName, entityId, username, revisionType, startTimestamp, endTimestamp, pageable
-        ).map(Revision::toDTO);
+                entityName, entityId, username, revisionType, startTimestamp, endTimestamp, pageable
+        ).map(revisionMapper::toDto);
     }
 
     /**
@@ -203,10 +192,7 @@ public class RevisionService {
      */
     @Transactional(readOnly = true)
     public List<RevisionDTO> getRevisionsByIpAddress(String ipAddress) {
-        return revisionRepository.findByIpAddress(ipAddress)
-            .stream()
-            .map(Revision::toDTO)
-            .collect(Collectors.toList());
+        return revisionMapper.mapList(revisionRepository.findByIpAddress(ipAddress));
     }
 
     /**
@@ -214,10 +200,7 @@ public class RevisionService {
      */
     @Transactional(readOnly = true)
     public List<RevisionDTO> getRevisionsByUserAgent(String userAgent) {
-        return revisionRepository.findByUserAgent(userAgent)
-            .stream()
-            .map(Revision::toDTO)
-            .collect(Collectors.toList());
+        return revisionMapper.mapList(revisionRepository.findByUserAgent(userAgent));
     }
 
     /**
@@ -225,9 +208,6 @@ public class RevisionService {
      */
     @Transactional(readOnly = true)
     public List<RevisionDTO> getRevisionsByChanges(String changePattern) {
-        return revisionRepository.findByChanges(changePattern)
-            .stream()
-            .map(Revision::toDTO)
-            .collect(Collectors.toList());
+        return revisionMapper.mapList(revisionRepository.findByChanges(changePattern));
     }
 }

@@ -96,17 +96,17 @@ public class CorsConfig {
     /**
      * Configure CORS for WebSocket
      */
-    @Bean
-    public org.springframework.messaging.simp.config.WebSocketMessageBrokerConfigurer webSocketCorsConfigurer() {
-        return new org.springframework.messaging.simp.config.WebSocketMessageBrokerConfigurer() {
-            @Override
-            public void registerStompEndpoints(org.springframework.messaging.simp.config.StompEndpointRegistry registry) {
-                registry.addEndpoint("/ws")
-                    .setAllowedOriginPatterns("*".equals(allowedOrigins) ? "*" : allowedOrigins.split(","))
-                    .withSockJS();
-            }
-        };
-    }
+//    @Bean
+//    public org.springframework.messaging.simp.config.WebSocketMessageBrokerConfigurer webSocketCorsConfigurer() {
+//        return new org.springframework.messaging.simp.config.WebSocketMessageBrokerConfigurer() {
+//            @Override
+//            public void registerStompEndpoints(org.springframework.messaging.simp.config.StompEndpointRegistry registry) {
+//                registry.addEndpoint("/ws")
+//                    .setAllowedOriginPatterns("*".equals(allowedOrigins) ? "*" : allowedOrigins.split(","))
+//                    .withSockJS();
+//            }
+//        };
+//    }
 
     /**
      * Get allowed origins as list

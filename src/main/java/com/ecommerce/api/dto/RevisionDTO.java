@@ -15,7 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RevisionDTO {
+public class RevisionDTO extends BaseDTO {
 
     private Long id;
     
