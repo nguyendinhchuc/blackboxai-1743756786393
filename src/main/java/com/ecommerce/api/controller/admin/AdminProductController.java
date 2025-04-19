@@ -37,10 +37,10 @@ public class AdminProductController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long categoryId,
             Model model) {
-
+        
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Product> productPage;
-
+        
         if (search != null && !search.isEmpty()) {
             productPage = productService.searchProducts(search, pageRequest);
         } else if (categoryId != null) {
@@ -54,7 +54,7 @@ public class AdminProductController {
         model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("totalElements", productPage.getTotalElements());
         model.addAttribute("pageSize", size);
-        model.addAttribute("categories", categoryService.findAll(pageRequest));
+        model.addAttribute("categories", categoryService.findAll(PageRequest.of(0, 100)).getContent());
 
         return "admin/products/list";
     }
@@ -62,7 +62,15 @@ public class AdminProductController {
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("product", new Product());
-        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("categories", categoryService.findAll(PageRequest.of(0, 100)).getContent());
+        return "admin/products/form";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        Product product = productService.findById(id);
+        model.addAttribute("product", product);
+        model.addAttribute("categories", categoryService.findAll(PageRequest.of(0, 100)).getContent());
         return "admin/products/form";
     }
 
@@ -72,11 +80,11 @@ public class AdminProductController {
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("images") MultipartFile[] images,
             RedirectAttributes redirectAttributes) {
-
+        
         try {
             product.setCategory(categoryService.findById(categoryId));
             Product savedProduct = productService.save(product);
-
+            
             if (images != null && images.length > 0) {
                 for (MultipartFile image : images) {
                     if (!image.isEmpty()) {
@@ -84,10 +92,10 @@ public class AdminProductController {
                     }
                 }
             }
-
+            
             redirectAttributes.addFlashAttribute("success", "Product created successfully");
             return "redirect:/admin/products";
-
+            
         } catch (IOException e) {
             redirectAttributes.addFlashAttribute("error", "Failed to upload images: " + e.getMessage());
             return "redirect:/admin/products/new";
@@ -97,14 +105,6 @@ public class AdminProductController {
         }
     }
 
-    @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        Product product = productService.findById(id);
-        model.addAttribute("product", product);
-        model.addAttribute("categories", categoryService.findAll());
-        return "admin/products/form";
-    }
-
     @PostMapping("/{id}/update")
     public String updateProduct(
             @PathVariable Long id,
@@ -112,15 +112,15 @@ public class AdminProductController {
             @RequestParam("categoryId") Long categoryId,
             @RequestParam(value = "images", required = false) MultipartFile[] images,
             RedirectAttributes redirectAttributes) {
-
+        
         try {
             Product existingProduct = productService.findById(id);
             product.setId(id);
             product.setCategory(categoryService.findById(categoryId));
             product.setImages(existingProduct.getImages()); // Preserve existing images
-
+            
             Product updatedProduct = productService.save(product);
-
+            
             if (images != null && images.length > 0) {
                 for (MultipartFile image : images) {
                     if (!image.isEmpty()) {
@@ -128,10 +128,10 @@ public class AdminProductController {
                     }
                 }
             }
-
+            
             redirectAttributes.addFlashAttribute("success", "Product updated successfully");
             return "redirect:/admin/products";
-
+            
         } catch (IOException e) {
             redirectAttributes.addFlashAttribute("error", "Failed to upload images: " + e.getMessage());
             return "redirect:/admin/products/" + id + "/edit";

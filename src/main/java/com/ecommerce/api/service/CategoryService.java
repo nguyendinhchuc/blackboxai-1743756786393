@@ -15,6 +15,10 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    /**
+     * @deprecated Use {@link #findAll(Pageable)} instead for pagination support.
+     */
+    @Deprecated
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
@@ -48,12 +52,12 @@ public class CategoryService {
     public Category updateCategory(Long id, Category categoryDetails) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-
+        
         category.setName(categoryDetails.getName());
         category.setDescription(categoryDetails.getDescription());
         category.setParentCategory(categoryDetails.getParentCategory());
         category.setImageUrl(categoryDetails.getImageUrl());
-
+        
         return categoryRepository.save(category);
     }
 

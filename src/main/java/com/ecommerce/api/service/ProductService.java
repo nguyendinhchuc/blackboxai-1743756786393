@@ -21,6 +21,10 @@ public class ProductService {
     @Autowired
     private ProductImageRepository productImageRepository;
 
+    /**
+     * @deprecated Use {@link #findAll(Pageable)} instead for pagination support.
+     */
+    @Deprecated
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
@@ -32,14 +36,14 @@ public class ProductService {
     @Transactional
     public Product createProduct(Product product) {
         Product savedProduct = productRepository.save(product);
-
+        
         if (product.getImages() != null) {
             for (ProductImage image : product.getImages()) {
                 image.setProduct(savedProduct);
                 productImageRepository.save(image);
             }
         }
-
+        
         return savedProduct;
     }
 
