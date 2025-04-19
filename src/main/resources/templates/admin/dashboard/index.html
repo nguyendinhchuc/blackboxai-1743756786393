@@ -63,6 +63,48 @@
         </div>
     </div>
 
+    <!-- Revenue Statistics -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Revenue Statistics</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-green-100 rounded-lg p-4 text-center">
+                <p class="text-gray-500">Total Revenue</p>
+                <p class="text-2xl font-semibold text-gray-800" th:text="${totalRevenue}">0</p>
+            </div>
+            <div class="bg-blue-100 rounded-lg p-4 text-center">
+                <p class="text-gray-500">Total Transactions</p>
+                <p class="text-2xl font-semibold text-gray-800" th:text="${totalTransactions}">0</p>
+            </div>
+            <div class="bg-purple-100 rounded-lg p-4 text-center">
+                <p class="text-gray-500">Average Transaction Value</p>
+                <p class="text-2xl font-semibold text-gray-800" th:text="${averageTransactionValue}">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Statistics -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Inventory Statistics</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-red-100 rounded-lg p-4 text-center">
+                <p class="text-gray-500">Low Stock Products</p>
+                <p class="text-2xl font-semibold text-gray-800" th:text="${lowStockProducts}">0</p>
+            </div>
+            <div class="bg-yellow-100 rounded-lg p-4 text-center">
+                <p class="text-gray-500">Out of Stock Products</p>
+                <p class="text-2xl font-semibold text-gray-800" th:text="${outOfStockProducts}">0</p>
+            </div>
+            <div class="bg-blue-100 rounded-lg p-4 text-center">
+                <p class="text-gray-500">Total Stock</p>
+                <p class="text-2xl font-semibold text-gray-800" th:text="${totalStock}">0</p>
+            </div>
+            <div class="bg-green-200 rounded-lg p-4 text-center">
+                <p class="text-gray-500">Total Inventory Value</p>
+                <p class="text-2xl font-semibold text-gray-800" th:text="${totalInventoryValue}">0</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Quick Actions -->
     <div class="bg-white rounded-lg shadow mb-8">
         <div class="px-6 py-4 border-b border-gray-200">

@@ -1,6 +1,10 @@
 package com.ecommerce.api.controller.admin;
 
 import com.ecommerce.api.model.User;
+import com.ecommerce.api.repository.UserRepository;
+import com.ecommerce.api.service.BannerService;
+import com.ecommerce.api.service.CategoryService;
+import com.ecommerce.api.service.ProductService;
 import com.ecommerce.api.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -19,8 +23,23 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/admin")
 public class AdminAuthController {
 
-    @Autowired
     private UserDetailsServiceImpl userDetailsService;
+    private ProductService productService;
+    private CategoryService categoryService;
+    private BannerService bannerService;
+    private UserRepository userRepository;
+
+    public AdminAuthController(UserDetailsServiceImpl userDetailsService,
+                               ProductService productService,
+                               CategoryService categoryService,
+                               BannerService bannerService,
+                               UserRepository userRepository) {
+        this.userDetailsService = userDetailsService;
+        this.productService = productService;
+        this.categoryService = categoryService;
+        this.bannerService = bannerService;
+        this.userRepository = userRepository;
+    }
 
     @GetMapping("/login")
     public String loginPage(
@@ -39,6 +58,8 @@ public class AdminAuthController {
         // Check if user is already logged in
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            // Call init method to perform dashboard calculations after login
+            init();
             return "redirect:/admin";
         }
 

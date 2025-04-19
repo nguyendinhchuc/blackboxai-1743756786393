@@ -34,6 +34,19 @@ public class AdminDashboardController {
         model.addAttribute("activeBanners", bannerService.countActiveBanners());
         model.addAttribute("totalUsers", userRepository.count());
 
+        // Add revenue statistics
+        Map<String, Object> revenueStats = statisticsService.getRevenueStatistics(null, null);
+        model.addAttribute("totalRevenue", revenueStats.getOrDefault("totalRevenue", 0));
+        model.addAttribute("totalTransactions", revenueStats.getOrDefault("totalTransactions", 0));
+        model.addAttribute("averageTransactionValue", revenueStats.getOrDefault("averageTransactionValue", 0));
+
+        // Add inventory statistics
+        Map<String, Object> inventoryStats = statisticsService.getInventoryStatistics();
+        model.addAttribute("lowStockProducts", inventoryStats.getOrDefault("lowStockProducts", 0));
+        model.addAttribute("outOfStockProducts", inventoryStats.getOrDefault("outOfStockProducts", 0));
+        model.addAttribute("totalStock", inventoryStats.getOrDefault("totalStock", 0));
+        model.addAttribute("totalInventoryValue", inventoryStats.getOrDefault("totalInventoryValue", 0));
+
         // Add any recent activities (this could be enhanced with a dedicated activity service)
         // model.addAttribute("recentActivities", activityService.getRecentActivities());
 
