@@ -3,6 +3,8 @@ package com.ecommerce.api.security;
 import com.ecommerce.api.service.UserDetailsServiceImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +21,8 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
@@ -47,12 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                         // Create authentication token
-                        UsernamePasswordAuthenticationToken authentication = 
-                            new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-                        
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails, null, userDetails.getAuthorities());
+
                         authentication.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request));
+                                new WebAuthenticationDetailsSource().buildDetails(request));
 
                         // Set authentication in context
                         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -96,22 +100,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        
+
         // Skip JWT authentication for these paths
         return path.startsWith("/css/") ||
-               path.startsWith("/js/") ||
-               path.startsWith("/images/") ||
-               path.startsWith("/fonts/") ||
-               path.startsWith("/webjars/") ||
-               path.equals("/") ||
-               path.equals("/home") ||
-               path.equals("/about") ||
-               path.startsWith("/admin/login") ||
-               path.startsWith("/admin/logout") ||
-               path.startsWith("/api/auth/") ||
-               path.startsWith("/api/public/") ||
-               path.startsWith("/swagger-ui/") ||
-               path.startsWith("/v3/api-docs/");
+                path.startsWith("/js/") ||
+                path.startsWith("/images/") ||
+                path.startsWith("/fonts/") ||
+                path.startsWith("/webjars/") ||
+                path.equals("/") ||
+                path.equals("/home") ||
+                path.equals("/about") ||
+                path.startsWith("/admin/login") ||
+                path.startsWith("/admin/logout") ||
+                path.startsWith("/api/auth/") ||
+                path.startsWith("/api/public/") ||
+                path.startsWith("/swagger-ui/") ||
+                path.startsWith("/v3/api-docs/");
     }
 
     /**
@@ -127,10 +131,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean isStaticResourceRequest(HttpServletRequest request) {
         String path = request.getServletPath();
         return path.startsWith("/css/") ||
-               path.startsWith("/js/") ||
-               path.startsWith("/images/") ||
-               path.startsWith("/fonts/") ||
-               path.startsWith("/webjars/");
+                path.startsWith("/js/") ||
+                path.startsWith("/images/") ||
+                path.startsWith("/fonts/") ||
+                path.startsWith("/webjars/");
     }
 
     /**
@@ -139,12 +143,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean isPublicEndpoint(HttpServletRequest request) {
         String path = request.getServletPath();
         return path.equals("/") ||
-               path.equals("/home") ||
-               path.equals("/about") ||
-               path.startsWith("/admin/login") ||
-               path.startsWith("/admin/logout") ||
-               path.startsWith("/api/auth/") ||
-               path.startsWith("/api/public/");
+                path.equals("/home") ||
+                path.equals("/about") ||
+                path.startsWith("/admin/login") ||
+                path.startsWith("/admin/logout") ||
+                path.startsWith("/api/auth/") ||
+                path.startsWith("/api/public/");
     }
 
     /**
@@ -153,6 +157,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean isDocumentationRequest(HttpServletRequest request) {
         String path = request.getServletPath();
         return path.startsWith("/swagger-ui/") ||
-               path.startsWith("/v3/api-docs/");
+                path.startsWith("/v3/api-docs/");
     }
 }

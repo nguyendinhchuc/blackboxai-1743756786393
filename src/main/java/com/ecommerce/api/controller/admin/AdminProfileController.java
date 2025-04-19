@@ -91,7 +91,7 @@ public class AdminProfileController {
                 return "redirect:/admin/profile";
             }
             
-            userDetailsService.deleteUser(currentUser);
+            userDetailsService.deleteUser(currentUser.getId());
             return "redirect:/admin/logout";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to delete account: " + e.getMessage());

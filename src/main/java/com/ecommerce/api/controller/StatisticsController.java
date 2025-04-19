@@ -28,4 +28,10 @@ public class StatisticsController {
         Map<String, Object> statistics = statisticsService.getInventoryStatistics();
         return ResponseEntity.ok(statistics);
     }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<?> getDashboardStatistics() {
+        Map<String, Object> statistics = statisticsService.getDashboardStatistics();
+        return ResponseEntity.ok(statistics);
+    }
 }

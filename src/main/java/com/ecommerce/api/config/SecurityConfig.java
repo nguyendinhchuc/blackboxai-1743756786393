@@ -60,22 +60,22 @@ public class SecurityConfig {
                 .and()
             .authorizeRequests()
                 // Public routes
-                .antMatchers("/", "/home", "/about").permitAll()
-                .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/public/**").permitAll()
-                .antMatchers("/css/**", "/js/**", "/images/**", "/fonts/**", "/webjars/**").permitAll()
+                .requestMatchers("/", "/home", "/about").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/fonts/**", "/webjars/**").permitAll()
                 
                 // Swagger UI
-                .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 
                 // Admin routes
-                .antMatchers("/admin/login", "/admin/logout").permitAll()
-                .antMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/login", "/admin/logout").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 
                 // API routes
-                .antMatchers("/api/products/**").permitAll()
-                .antMatchers("/api/categories/**").permitAll()
-                .antMatchers("/api/banners/**").permitAll()
+                .requestMatchers("/api/products/**").permitAll()
+                .requestMatchers("/api/categories/**").permitAll()
+                .requestMatchers("/api/banners/**").permitAll()
                 
                 // Secure all other routes
                 .anyRequest().authenticated()

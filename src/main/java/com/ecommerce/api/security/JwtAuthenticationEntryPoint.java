@@ -1,6 +1,8 @@
 package com.ecommerce.api.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -16,6 +18,8 @@ import java.util.Map;
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationEntryPoint.class);
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -23,7 +27,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
-        
+
         // Check if it's an API request
         if (isApiRequest(request)) {
             handleApiUnauthorized(request, response, authException);
@@ -39,7 +43,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException authException) throws IOException {
-        
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
@@ -60,7 +64,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException authException) throws IOException {
-        
+
         // Store the original request URL in session
         String targetUrl = request.getRequestURI();
         if (request.getQueryString() != null) {
@@ -96,7 +100,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private Map<String, Object> getErrorDetails(
             HttpServletRequest request,
             AuthenticationException authException) {
-        
+
         Map<String, Object> details = new HashMap<>();
         details.put("timestamp", System.currentTimeMillis());
         details.put("status", HttpServletResponse.SC_UNAUTHORIZED);
@@ -123,20 +127,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private void logAuthenticationFailure(
             HttpServletRequest request,
             AuthenticationException authException) {
-        
+
         String path = request.getServletPath();
         String remoteAddr = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         String errorMessage = authException.getMessage();
 
-        // Log the authentication failure
-        String logMessage = String.format(
-            "Authentication failure - Path: %s, IP: %s, User-Agent: %s, Error: %s",
-            path, remoteAddr, userAgent, errorMessage
-        );
-        
-        // You can use your preferred logging framework here
-        System.err.println(logMessage);
+        // Log the authentication failure using SLF4J
+        logger.warn("Authentication failure - Path: {}, IP: {}, User-Agent: {}, Error: {}",
+                path, remoteAddr, userAgent, errorMessage);
     }
 
     /**

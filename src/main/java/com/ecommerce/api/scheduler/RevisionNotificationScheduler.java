@@ -187,29 +187,6 @@ public class RevisionNotificationScheduler {
     }
 
     /**
-     * Get notification count
-     */
-    public int getNotificationCount() {
-        return notificationCount.get();
-    }
-
-    /**
-     * Get error count
-     */
-    public int getErrorCount() {
-        return errorCount.get();
-    }
-
-    /**
-     * Get last cleanup time
-     */
-    public LocalDateTime getLastCleanupTime() {
-        return LocalDateTime.now().minusMillis(
-            System.currentTimeMillis() - lastCleanupTime.get()
-        );
-    }
-
-    /**
      * Increment notification count
      */
     public void incrementNotificationCount() {

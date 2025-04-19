@@ -39,7 +39,7 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        
+
         // Allow all origins if "*" is specified, otherwise use the specified origins
         if ("*".equals(allowedOrigins)) {
             config.addAllowedOriginPattern("*");
@@ -67,7 +67,7 @@ public class CorsConfig {
         config.setMaxAge(maxAge);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        
+
         // Apply CORS configuration to all paths
         source.registerCorsConfiguration("/**", config);
 
@@ -82,31 +82,17 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                String[] origins = "*".equals(allowedOrigins) ? new String[]{"*"} : allowedOrigins.split(",");
                 registry.addMapping("/**")
-                    .allowedOriginPatterns("*".equals(allowedOrigins) ? "*" : allowedOrigins.split(","))
-                    .allowedMethods(allowedMethods.split(","))
-                    .allowedHeaders("*".equals(allowedHeaders) ? "*" : allowedHeaders.split(","))
-                    .exposedHeaders(exposedHeaders.split(","))
-                    .allowCredentials(allowCredentials)
-                    .maxAge(maxAge);
+                        .allowedOriginPatterns(origins)
+                        .allowedMethods(allowedMethods.split(","))
+                        .allowedHeaders("*".equals(allowedHeaders) ? new String[]{"*"} : allowedHeaders.split(","))
+                        .exposedHeaders(exposedHeaders.split(","))
+                        .allowCredentials(allowCredentials)
+                        .maxAge(maxAge);
             }
         };
     }
-
-    /**
-     * Configure CORS for WebSocket
-     */
-//    @Bean
-//    public org.springframework.messaging.simp.config.WebSocketMessageBrokerConfigurer webSocketCorsConfigurer() {
-//        return new org.springframework.messaging.simp.config.WebSocketMessageBrokerConfigurer() {
-//            @Override
-//            public void registerStompEndpoints(org.springframework.messaging.simp.config.StompEndpointRegistry registry) {
-//                registry.addEndpoint("/ws")
-//                    .setAllowedOriginPatterns("*".equals(allowedOrigins) ? "*" : allowedOrigins.split(","))
-//                    .withSockJS();
-//            }
-//        };
-//    }
 
     /**
      * Get allowed origins as list

@@ -1,14 +1,12 @@
 package com.ecommerce.api.model;
 
+import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "users",
@@ -53,7 +51,23 @@ public class User {
     @JoinColumn(name = "role_id")
     private Role role;
 
-    public User() {}
+    @Column(name = "avatar")
+    private String avatar;
+
+    @Column(name = "is_email_verified")
+    private boolean isEmailVerified;
+
+    @Column(name = "is_two_factor_enabled")
+    private boolean isTwoFactorEnabled;
+
+    @Column(name = "last_logout_at")
+    private LocalDateTime lastLogoutAt;
+
+    public User() {
+        this.isEmailVerified = false;
+        this.isTwoFactorEnabled = false;
+        this.avatar = "";
+    }
 
     public User(String username, String email, String password) {
         this.username = username;
@@ -71,5 +85,8 @@ public class User {
         this.lastName = "";
         this.tenantId = tenantId;
         this.role = role;
+        this.isEmailVerified = false;
+        this.isTwoFactorEnabled = false;
+        this.avatar = "";
     }
 }

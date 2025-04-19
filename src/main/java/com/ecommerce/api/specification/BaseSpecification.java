@@ -130,21 +130,6 @@ public class BaseSpecification<T extends BaseEntity> implements Specification<T>
     }
 
     /**
-     * Create number range predicate
-     */
-    protected Predicate createNumberRangePredicate(Root<T> root, CriteriaBuilder cb, String field,
-                                                 Number min, Number max) {
-        if (min != null && max != null) {
-            return cb.between(root.get(field), min, max);
-        } else if (min != null) {
-            return cb.ge(root.get(field), min);
-        } else if (max != null) {
-            return cb.le(root.get(field), max);
-        }
-        return null;
-    }
-
-    /**
      * Create boolean predicate
      */
     protected Predicate createBooleanPredicate(Root<T> root, CriteriaBuilder cb, String field, Boolean value) {

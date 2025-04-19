@@ -150,29 +150,4 @@ public class RevisionException extends CustomException {
         this.entityName = entityName;
         this.entityId = entityId;
     }
-
-    /**
-     * Get error details
-     */
-    @Override
-    public Object getErrorDetails() {
-        if (entityName != null && entityId != null) {
-            return new RevisionErrorDetails(entityName, entityId);
-        }
-        return super.getErrorDetails();
-    }
-
-    /**
-     * Revision error details class
-     */
-    @Getter
-    public static class RevisionErrorDetails {
-        private final String entityName;
-        private final Long entityId;
-
-        public RevisionErrorDetails(String entityName, Long entityId) {
-            this.entityName = entityName;
-            this.entityId = entityId;
-        }
-    }
 }

@@ -2,6 +2,7 @@ package com.ecommerce.api.event;
 
 import com.ecommerce.api.config.RevisionNotificationConfig;
 import com.ecommerce.api.model.Revision;
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
@@ -16,7 +17,8 @@ public class RevisionNotificationEvent extends ApplicationEvent {
     private final List<String> recipients;
     private final Map<String, Object> additionalData;
     private final RevisionNotificationConfig.NotificationLevel level;
-    private final long timestamp;
+    @Getter(AccessLevel.NONE)
+    public final long timestamp;
 
     /**
      * Constructor for revision-related notifications

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -50,8 +51,8 @@ public class RevisionExporter {
             };
         } catch (Exception e) {
             log.error("Error exporting revisions to {}: {}", format, e.getMessage());
-            throw new RevisionException.processingError(
-                "Error exporting revisions to " + format, e);
+            throw RevisionException.processingError(
+                    "Error exporting revisions to " + format, e);
         }
     }
 
@@ -60,9 +61,9 @@ public class RevisionExporter {
      */
     private byte[] exportToJson(List<RevisionDTO> revisions) throws IOException {
         ObjectMapper mapper = objectMapper.copy()
-            .registerModule(new JavaTimeModule());
+                .registerModule(new JavaTimeModule());
         return mapper.writerWithDefaultPrettyPrinter()
-            .writeValueAsBytes(revisions);
+                .writeValueAsBytes(revisions);
     }
 
     /**
@@ -71,11 +72,11 @@ public class RevisionExporter {
     private byte[] exportToCsv(List<RevisionDTO> revisions) throws IOException {
         CsvMapper csvMapper = new CsvMapper();
         CsvSchema schema = csvMapper.schemaFor(RevisionDTO.class)
-            .withHeader()
-            .withColumnSeparator(',');
+                .withHeader()
+                .withColumnSeparator(',');
 
         return csvMapper.writer(schema)
-            .writeValueAsBytes(revisions);
+                .writeValueAsBytes(revisions);
     }
 
     /**
@@ -108,7 +109,7 @@ public class RevisionExporter {
                 row.createCell(3).setCellValue(revision.getRevisionType().toString());
                 row.createCell(4).setCellValue(revision.getUsername());
                 row.createCell(5).setCellValue(
-                    RevisionUtils.timestampToLocalDateTime(revision.getTimestamp()).toString()
+                        RevisionUtils.timestampToLocalDateTime(revision.getTimestamp()).toString()
                 );
                 row.createCell(6).setCellValue(formatChanges(revision.getChanges()));
                 row.createCell(7).setCellValue(revision.getReason());
@@ -164,9 +165,9 @@ public class RevisionExporter {
      */
     public String generateExportFilename(ExportFormat format, String entityName) {
         String timestamp = LocalDateTime.now().format(RevisionConstants.DATE_TIME_FORMATTER)
-            .replace(" ", "_")
-            .replace(":", "-");
-        
+                .replace(" ", "_")
+                .replace(":", "-");
+
         String extension = switch (format) {
             case JSON -> "json";
             case CSV -> "csv";
@@ -175,9 +176,9 @@ public class RevisionExporter {
         };
 
         return String.format("revisions_%s_%s.%s",
-            entityName != null ? entityName : "all",
-            timestamp,
-            extension
+                entityName != null ? entityName : "all",
+                timestamp,
+                extension
         );
     }
 
@@ -203,17 +204,18 @@ public class RevisionExporter {
     /**
      * Export revisions with custom fields
      */
-    public byte[] exportRevisionsWithFields(List<RevisionDTO> revisions, 
-                                          List<String> fields,
-                                          ExportFormat format) {
+    public byte[] exportRevisionsWithFields(List<RevisionDTO> revisions,
+                                            List<String> fields,
+                                            ExportFormat format) {
         // Filter revision data to include only specified fields
         List<Map<String, Object>> filteredData = revisions.stream()
-            .map(revision -> objectMapper.convertValue(revision, Map.class))
-            .map(map -> {
-                map.keySet().retainAll(fields);
-                return map;
-            })
-            .toList();
+                .map(revision -> objectMapper.convertValue(revision,
+                        new TypeReference<Map<String, Object>>() {}))
+                .map(map -> {
+                    map.keySet().retainAll(fields);
+                    return map;
+                })
+                .toList();
 
         try {
             return switch (format) {
@@ -223,12 +225,12 @@ public class RevisionExporter {
                     CsvSchema.Builder schemaBuilder = CsvSchema.builder();
                     fields.forEach(schemaBuilder::addColumn);
                     yield csvMapper.writer(schemaBuilder.build().withHeader())
-                        .writeValueAsBytes(filteredData);
+                            .writeValueAsBytes(filteredData);
                 }
                 case EXCEL -> {
                     try (Workbook workbook = new XSSFWorkbook()) {
                         Sheet sheet = workbook.createSheet("Revisions");
-                        
+
                         // Create header row
                         Row headerRow = sheet.createRow(0);
                         for (int i = 0; i < fields.size(); i++) {
@@ -242,7 +244,7 @@ public class RevisionExporter {
                             for (int i = 0; i < fields.size(); i++) {
                                 Object value = data.get(fields.get(i));
                                 row.createCell(i).setCellValue(
-                                    value != null ? value.toString() : ""
+                                        value != null ? value.toString() : ""
                                 );
                             }
                         }
@@ -253,11 +255,11 @@ public class RevisionExporter {
                     }
                 }
                 case PDF -> throw new UnsupportedOperationException(
-                    "PDF export not yet implemented");
+                        "PDF export not yet implemented");
             };
         } catch (Exception e) {
-            throw new RevisionException.processingError(
-                "Error exporting revisions with custom fields", e);
+            throw RevisionException.processingError (
+                    "Error exporting revisions with custom fields", e);
         }
     }
 }

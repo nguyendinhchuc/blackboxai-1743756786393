@@ -57,12 +57,12 @@ public class ApiResponse<T> {
      * Create an error response
      */
     public static <T> ApiResponse<T> error(String message) {
-        return ApiResponse.<T>builder()
-                .success(false)
-                .message(message)
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .build();
+        ApiResponse<T> res = new ApiResponse<>();
+        res.setSuccess(false);
+        res.setMessage(message);
+        res.setTimestamp(LocalDateTime.now());
+        res.setStatus(HttpStatus.BAD_REQUEST.value());
+        return res;
     }
 
     /**
@@ -120,27 +120,6 @@ public class ApiResponse<T> {
      */
     public static <T> ResponseEntity<ApiResponse<T>> ok(String message, T data) {
         return success(message, data).toResponseEntity();
-    }
-
-    /**
-     * Create an error response entity
-     */
-    public static <T> ResponseEntity<ApiResponse<T>> fail(String message) {
-        return error(message).toResponseEntity();
-    }
-
-    /**
-     * Create an error response entity with status
-     */
-    public static <T> ResponseEntity<ApiResponse<T>> fail(String message, HttpStatus status) {
-        return error(message, status).toResponseEntity();
-    }
-
-    /**
-     * Create an error response entity with validation errors
-     */
-    public static <T> ResponseEntity<ApiResponse<T>> fail(String message, Object errors) {
-        return error(message, errors).toResponseEntity();
     }
 
     /**

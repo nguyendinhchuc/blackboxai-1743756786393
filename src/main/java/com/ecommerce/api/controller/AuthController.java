@@ -76,8 +76,8 @@ public class AuthController {
                     .lastName(user.getLastName())
                     .email(user.getEmail())
                     .avatar(user.getAvatar())
-                    .isEmailVerified(user.getIsEmailVerified())
-                    .isTwoFactorEnabled(user.getIsTwoFactorEnabled())
+                    .isEmailVerified(user.isEmailVerified())
+                    .isTwoFactorEnabled(user.isTwoFactorEnabled())
                     .lastLoginAt(System.currentTimeMillis())
                     .lastLoginIp(request.getRemoteAddr())
                     .build();

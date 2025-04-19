@@ -15,6 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/banners")
@@ -27,7 +30,7 @@ public class AdminBannerController {
     @GetMapping
     public String listBanners(Model model) {
         // Get banners sorted by display order
-        model.addAttribute("banners", bannerService.findAllByOrderByDisplayOrderAsc());
+        model.addAttribute("banners", bannerService.getActiveBanners());
         return "admin/banners/list";
     }
 
@@ -35,7 +38,7 @@ public class AdminBannerController {
     @ResponseBody
     public ResponseEntity<Banner> getBanner(@PathVariable Long id) {
         try {
-            Banner banner = bannerService.findById(id);
+            Banner banner = bannerService.getBannerById(id);
             return ResponseEntity.ok(banner);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
@@ -76,7 +79,7 @@ public class AdminBannerController {
             @RequestParam(value = "image", required = false) MultipartFile image,
             RedirectAttributes redirectAttributes) {
         try {
-            Banner existingBanner = bannerService.findById(id);
+            Banner existingBanner = bannerService.getBannerById(id);
             banner.setId(id);
             
             // Keep existing image if no new image is uploaded
@@ -106,14 +109,14 @@ public class AdminBannerController {
             @PathVariable Long id,
             RedirectAttributes redirectAttributes) {
         try {
-            Banner banner = bannerService.findById(id);
+            Banner banner = bannerService.getBannerById(id);
             
             // Delete banner image
             if (banner.getImageUrl() != null) {
                 bannerService.deleteImage(banner.getImageUrl());
             }
             
-            bannerService.deleteById(id);
+            bannerService.deleteBanner(id);
             redirectAttributes.addFlashAttribute("success", "Banner deleted successfully");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to delete banner: " + e.getMessage());
@@ -125,7 +128,8 @@ public class AdminBannerController {
     @ResponseBody
     public ResponseEntity<?> reorderBanners(@RequestBody Long[] bannerIds) {
         try {
-            bannerService.reorderBanners(bannerIds);
+            List<Long> bannerIdList = Arrays.stream(bannerIds).collect(Collectors.toList());
+            bannerService.reorderBanners(bannerIdList);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to reorder banners: " + e.getMessage());

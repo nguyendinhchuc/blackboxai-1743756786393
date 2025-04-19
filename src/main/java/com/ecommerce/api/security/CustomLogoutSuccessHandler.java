@@ -3,6 +3,8 @@ package com.ecommerce.api.security;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.service.UserDetailsServiceImpl;
 import com.ecommerce.api.service.UserSessionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
@@ -17,6 +19,8 @@ import java.time.LocalDateTime;
 
 @Component
 public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomLogoutSuccessHandler.class);
 
     @Autowired
     private UserSessionService userSessionService;
@@ -39,19 +43,19 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
             try {
                 // Get the current user
                 User user = userDetailsService.getCurrentUser();
-                
+
                 // Get the current session ID
                 String sessionId = request.getSession().getId();
-                
+
                 // Deactivate the current session
                 userSessionService.deactivateSession(sessionId);
-                
+
                 // Log the logout activity
                 logLogoutActivity(request, user);
-                
+
                 // Perform any additional cleanup
                 performLogoutCleanup(request, user);
-                
+
             } catch (Exception e) {
                 logger.error("Error during logout process", e);
             }
@@ -77,13 +81,13 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
     private void logLogoutActivity(HttpServletRequest request, User user) {
         String ipAddress = getClientIP(request);
         String userAgent = request.getHeader("User-Agent");
-        
+
         // Log the logout event
-        logger.info("User {} logged out - IP: {}, User-Agent: {}, Time: {}", 
-                   user.getUsername(),
-                   ipAddress,
-                   userAgent,
-                   LocalDateTime.now());
+        logger.info("User {} logged out - IP: {}, User-Agent: {}, Time: {}",
+                user.getUsername(),
+                ipAddress,
+                userAgent,
+                LocalDateTime.now());
     }
 
     /**
@@ -128,10 +132,10 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
      */
     private boolean isAuthenticationCookie(String cookieName) {
         return cookieName.toLowerCase().contains("jwt") ||
-               cookieName.toLowerCase().contains("token") ||
-               cookieName.toLowerCase().contains("auth") ||
-               cookieName.toLowerCase().contains("remember-me") ||
-               cookieName.toLowerCase().contains("session");
+                cookieName.toLowerCase().contains("token") ||
+                cookieName.toLowerCase().contains("auth") ||
+                cookieName.toLowerCase().contains("remember-me") ||
+                cookieName.toLowerCase().contains("session");
     }
 
     /**
@@ -151,7 +155,7 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
     @Override
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response) {
         String targetUrl = super.determineTargetUrl(request, response);
-        
+
         // Add timestamp to prevent caching
         return targetUrl + (targetUrl.contains("?") ? "&" : "?") + "t=" + System.currentTimeMillis();
     }
@@ -161,7 +165,7 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
      */
     private void handleLogoutError(HttpServletRequest request, Exception e) {
         logger.error("Error during logout", e);
-        
+
         // Store error message in session
         HttpSession session = request.getSession(true);
         session.setAttribute("logoutError", "An error occurred during logout. Please try again.");

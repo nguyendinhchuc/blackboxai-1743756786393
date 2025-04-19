@@ -1,6 +1,8 @@
 package com.ecommerce.api.security;
 
 import io.jsonwebtoken.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,6 +15,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @Value("${app.jwt.secret}")
     private String jwtSecret;
@@ -27,8 +31,8 @@ public class JwtTokenProvider {
      * Generate token from authentication object
      */
     public String generateToken(Authentication authentication) {
-        org.springframework.security.core.userdetails.User userPrincipal = 
-            (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        org.springframework.security.core.userdetails.User userPrincipal =
+                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
@@ -52,8 +56,8 @@ public class JwtTokenProvider {
      * Generate refresh token
      */
     public String generateRefreshToken(Authentication authentication) {
-        org.springframework.security.core.userdetails.User userPrincipal = 
-            (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        org.springframework.security.core.userdetails.User userPrincipal =
+                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshExpirationInMs);
@@ -96,14 +100,19 @@ public class JwtTokenProvider {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException ex) {
+            logger.error("Invalid JWT signature: {}", ex.getMessage());
             throw new JwtException("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
+            logger.error("Invalid JWT token: {}", ex.getMessage());
             throw new JwtException("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
+            logger.error("Expired JWT token: {}", ex.getMessage());
             throw new JwtException("Expired JWT token");
         } catch (UnsupportedJwtException ex) {
+            logger.error("Unsupported JWT token: {}", ex.getMessage());
             throw new JwtException("Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
+            logger.error("JWT claims string is empty: {}", ex.getMessage());
             throw new JwtException("JWT claims string is empty");
         }
     }
@@ -157,7 +166,13 @@ public class JwtTokenProvider {
     public boolean shouldTokenBeRefreshed(String token) {
         // Refresh token if it has less than 10% of its original validity time remaining
         long remainingTime = getTokenRemainingValidityTime(token);
-        return remainingTime < (jwtExpirationInMs * 0.1);
+        boolean shouldRefresh = remainingTime < (jwtExpirationInMs * 0.1);
+
+        if (shouldRefresh) {
+            logger.info("Token needs refresh - Remaining validity time: {} ms", remainingTime);
+        }
+
+        return shouldRefresh;
     }
 
     /**

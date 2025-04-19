@@ -10,8 +10,8 @@ public class RevisionNotificationException extends RuntimeException {
     private final String code;
     private final String details;
 
-    private RevisionNotificationException(String message, String code, 
-            String details, HttpStatus status, Throwable cause) {
+    private RevisionNotificationException(String message, String code,
+                                          String details, HttpStatus status, Throwable cause) {
         super(message, cause);
         this.code = code;
         this.details = details;
@@ -23,11 +23,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException templateNotFound(String templateName) {
         return new RevisionNotificationException(
-            String.format("Template not found: %s", templateName),
-            "NOTIFICATION_TEMPLATE_NOT_FOUND",
-            String.format("The notification template '%s' could not be found", templateName),
-            HttpStatus.NOT_FOUND,
-            null
+                String.format("Template not found: %s", templateName),
+                "NOTIFICATION_TEMPLATE_NOT_FOUND",
+                String.format("The notification template '%s' could not be found", templateName),
+                HttpStatus.NOT_FOUND,
+                null
         );
     }
 
@@ -37,11 +37,11 @@ public class RevisionNotificationException extends RuntimeException {
     public static RevisionNotificationException templateProcessingFailed(
             String templateName, String reason, Throwable cause) {
         return new RevisionNotificationException(
-            String.format("Failed to process template %s: %s", templateName, reason),
-            "NOTIFICATION_TEMPLATE_PROCESSING_FAILED",
-            String.format("Error processing template '%s': %s", templateName, reason),
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            cause
+                String.format("Failed to process template %s: %s", templateName, reason),
+                "NOTIFICATION_TEMPLATE_PROCESSING_FAILED",
+                String.format("Error processing template '%s': %s", templateName, reason),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                cause
         );
     }
 
@@ -50,11 +50,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException invalidEmailConfiguration(String reason) {
         return new RevisionNotificationException(
-            String.format("Invalid email configuration: %s", reason),
-            "NOTIFICATION_INVALID_EMAIL_CONFIG",
-            String.format("The email configuration is invalid: %s", reason),
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            null
+                String.format("Invalid email configuration: %s", reason),
+                "NOTIFICATION_INVALID_EMAIL_CONFIG",
+                String.format("The email configuration is invalid: %s", reason),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                null
         );
     }
 
@@ -63,11 +63,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException invalidEmailRecipient(String recipient) {
         return new RevisionNotificationException(
-            String.format("Invalid email recipient: %s", recipient),
-            "NOTIFICATION_INVALID_RECIPIENT",
-            String.format("The email recipient '%s' is invalid", recipient),
-            HttpStatus.BAD_REQUEST,
-            null
+                String.format("Invalid email recipient: %s", recipient),
+                "NOTIFICATION_INVALID_RECIPIENT",
+                String.format("The email recipient '%s' is invalid", recipient),
+                HttpStatus.BAD_REQUEST,
+                null
         );
     }
 
@@ -77,11 +77,11 @@ public class RevisionNotificationException extends RuntimeException {
     public static RevisionNotificationException emailSendingFailed(
             String notificationId, String reason, Throwable cause) {
         return new RevisionNotificationException(
-            String.format("Failed to send email notification %s: %s", notificationId, reason),
-            "NOTIFICATION_SENDING_FAILED",
-            String.format("Error sending notification '%s': %s", notificationId, reason),
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            cause
+                String.format("Failed to send email notification %s: %s", notificationId, reason),
+                "NOTIFICATION_SENDING_FAILED",
+                String.format("Error sending notification '%s': %s", notificationId, reason),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                cause
         );
     }
 
@@ -90,11 +90,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException rateLimitExceeded(String recipient) {
         return new RevisionNotificationException(
-            String.format("Rate limit exceeded for recipient: %s", recipient),
-            "NOTIFICATION_RATE_LIMIT_EXCEEDED",
-            String.format("Too many notifications sent to recipient '%s'", recipient),
-            HttpStatus.TOO_MANY_REQUESTS,
-            null
+                String.format("Rate limit exceeded for recipient: %s", recipient),
+                "NOTIFICATION_RATE_LIMIT_EXCEEDED",
+                String.format("Too many notifications sent to recipient '%s'", recipient),
+                HttpStatus.TOO_MANY_REQUESTS,
+                null
         );
     }
 
@@ -103,11 +103,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException invalidNotificationType(String type) {
         return new RevisionNotificationException(
-            String.format("Invalid notification type: %s", type),
-            "NOTIFICATION_INVALID_TYPE",
-            String.format("The notification type '%s' is not supported", type),
-            HttpStatus.BAD_REQUEST,
-            null
+                String.format("Invalid notification type: %s", type),
+                "NOTIFICATION_INVALID_TYPE",
+                String.format("The notification type '%s' is not supported", type),
+                HttpStatus.BAD_REQUEST,
+                null
         );
     }
 
@@ -116,11 +116,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException invalidContent(String reason) {
         return new RevisionNotificationException(
-            String.format("Invalid notification content: %s", reason),
-            "NOTIFICATION_INVALID_CONTENT",
-            String.format("The notification content is invalid: %s", reason),
-            HttpStatus.BAD_REQUEST,
-            null
+                String.format("Invalid notification content: %s", reason),
+                "NOTIFICATION_INVALID_CONTENT",
+                String.format("The notification content is invalid: %s", reason),
+                HttpStatus.BAD_REQUEST,
+                null
         );
     }
 
@@ -129,11 +129,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException queueFull(int queueSize) {
         return new RevisionNotificationException(
-            String.format("Notification queue is full (size: %d)", queueSize),
-            "NOTIFICATION_QUEUE_FULL",
-            String.format("The notification queue has reached its maximum size of %d", queueSize),
-            HttpStatus.SERVICE_UNAVAILABLE,
-            null
+                String.format("Notification queue is full (size: %d)", queueSize),
+                "NOTIFICATION_QUEUE_FULL",
+                String.format("The notification queue has reached its maximum size of %d", queueSize),
+                HttpStatus.SERVICE_UNAVAILABLE,
+                null
         );
     }
 
@@ -143,12 +143,12 @@ public class RevisionNotificationException extends RuntimeException {
     public static RevisionNotificationException maxRetriesExceeded(
             String notificationId, int maxRetries) {
         return new RevisionNotificationException(
-            String.format("Maximum retries exceeded for notification: %s", notificationId),
-            "NOTIFICATION_MAX_RETRIES_EXCEEDED",
-            String.format("Failed to send notification '%s' after %d attempts", 
-                notificationId, maxRetries),
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            null
+                String.format("Maximum retries exceeded for notification: %s", notificationId),
+                "NOTIFICATION_MAX_RETRIES_EXCEEDED",
+                String.format("Failed to send notification '%s' after %d attempts",
+                        notificationId, maxRetries),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                null
         );
     }
 
@@ -158,12 +158,12 @@ public class RevisionNotificationException extends RuntimeException {
     public static RevisionNotificationException invalidTemplateData(
             String templateName, String reason) {
         return new RevisionNotificationException(
-            String.format("Invalid template data for %s: %s", templateName, reason),
-            "NOTIFICATION_INVALID_TEMPLATE_DATA",
-            String.format("The data provided for template '%s' is invalid: %s", 
-                templateName, reason),
-            HttpStatus.BAD_REQUEST,
-            null
+                String.format("Invalid template data for %s: %s", templateName, reason),
+                "NOTIFICATION_INVALID_TEMPLATE_DATA",
+                String.format("The data provided for template '%s' is invalid: %s",
+                        templateName, reason),
+                HttpStatus.BAD_REQUEST,
+                null
         );
     }
 
@@ -172,11 +172,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException serviceUnavailable(String reason) {
         return new RevisionNotificationException(
-            String.format("Notification service unavailable: %s", reason),
-            "NOTIFICATION_SERVICE_UNAVAILABLE",
-            String.format("The notification service is currently unavailable: %s", reason),
-            HttpStatus.SERVICE_UNAVAILABLE,
-            null
+                String.format("Notification service unavailable: %s", reason),
+                "NOTIFICATION_SERVICE_UNAVAILABLE",
+                String.format("The notification service is currently unavailable: %s", reason),
+                HttpStatus.SERVICE_UNAVAILABLE,
+                null
         );
     }
 
@@ -185,11 +185,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException configurationError(String reason) {
         return new RevisionNotificationException(
-            String.format("Notification configuration error: %s", reason),
-            "NOTIFICATION_CONFIG_ERROR",
-            String.format("There is an error in the notification configuration: %s", reason),
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            null
+                String.format("Notification configuration error: %s", reason),
+                "NOTIFICATION_CONFIG_ERROR",
+                String.format("There is an error in the notification configuration: %s", reason),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                null
         );
     }
 
@@ -198,11 +198,11 @@ public class RevisionNotificationException extends RuntimeException {
      */
     public static RevisionNotificationException permissionDenied(String action) {
         return new RevisionNotificationException(
-            String.format("Permission denied: %s", action),
-            "NOTIFICATION_PERMISSION_DENIED",
-            String.format("You do not have permission to perform this action: %s", action),
-            HttpStatus.FORBIDDEN,
-            null
+                String.format("Permission denied: %s", action),
+                "NOTIFICATION_PERMISSION_DENIED",
+                String.format("You do not have permission to perform this action: %s", action),
+                HttpStatus.FORBIDDEN,
+                null
         );
     }
 
@@ -212,12 +212,26 @@ public class RevisionNotificationException extends RuntimeException {
     public static RevisionNotificationException resourceNotFound(
             String resourceType, String resourceId) {
         return new RevisionNotificationException(
-            String.format("%s not found: %s", resourceType, resourceId),
-            "NOTIFICATION_RESOURCE_NOT_FOUND",
-            String.format("The requested %s '%s' could not be found", 
-                resourceType, resourceId),
-            HttpStatus.NOT_FOUND,
-            null
+                String.format("%s not found: %s", resourceType, resourceId),
+                "NOTIFICATION_RESOURCE_NOT_FOUND",
+                String.format("The requested %s '%s' could not be found",
+                        resourceType, resourceId),
+                HttpStatus.NOT_FOUND,
+                null
+        );
+    }
+
+    /**
+     * Processing error exception
+     */
+    public static RevisionNotificationException processingError(
+            String recipient, String message, Throwable cause) {
+        return new RevisionNotificationException(
+                String.format("Processing error for recipient %s: %s", recipient, message),
+                "NOTIFICATION_PROCESSING_ERROR",
+                String.format("An error occurred while processing notification for recipient '%s': %s", recipient, message),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                cause
         );
     }
 }

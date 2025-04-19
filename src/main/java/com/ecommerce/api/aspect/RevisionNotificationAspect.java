@@ -36,9 +36,9 @@ public class RevisionNotificationAspect {
     public Object aroundNotificationMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
-        
-        log.debug("Starting notification method: {} with args: {}", methodName, 
-            Arrays.toString(args));
+
+        log.debug("Starting notification method: {} with args: {}", methodName,
+                Arrays.toString(args));
 
         Instant start = Instant.now();
         try {
@@ -64,7 +64,7 @@ public class RevisionNotificationAspect {
             throw handleException(e, methodName, args);
         } finally {
             log.debug("Completed notification method: {} in {} ms", methodName,
-                Duration.between(start, Instant.now()).toMillis());
+                    Duration.between(start, Instant.now()).toMillis());
         }
     }
 
@@ -72,25 +72,25 @@ public class RevisionNotificationAspect {
      * Execute method with retry capability
      */
     @Retryable(
-        value = {MessagingException.class, TimeoutException.class},
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 1000, multiplier = 2)
+            value = {MessagingException.class, TimeoutException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     private Object executeWithRetry(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
-        RevisionNotificationConfig.RetryConfig retryConfig = notificationConfig.getRetryConfig();
+        RevisionNotificationConfig.RetryConfig retryConfig = notificationConfig.getRetry();
         Exception lastException = null;
 
-        for (int attempt = 0; attempt < retryConfig.maxRetries(); attempt++) {
+        for (int attempt = 0; attempt < retryConfig.getMaxRetries(); attempt++) {
             try {
                 return joinPoint.proceed();
             } catch (Exception e) {
                 lastException = e;
-                if (!shouldRetry(e) || !retryConfig.shouldRetry(attempt)) {
+                if (!shouldRetry(e)) {
                     break;
                 }
                 handleRetryAttempt(methodName, attempt, e);
-                Thread.sleep(retryConfig.getNextDelay(attempt));
+                Thread.sleep(retryConfig.getDelayMs() * (long) Math.pow(2, attempt));
             }
         }
 
@@ -102,9 +102,9 @@ public class RevisionNotificationAspect {
      */
     private void recordPreExecutionMetrics(String methodName, Object[] args) {
         revisionMetrics.recordApiCall(
-            "notification",
-            methodName,
-            200  // Initial status code
+                "notification",
+                methodName,
+                200  // Initial status code
         );
     }
 
@@ -113,8 +113,8 @@ public class RevisionNotificationAspect {
      */
     private void recordSuccessMetrics(String methodName, Duration duration) {
         revisionMetrics.recordQueryPerformance(
-            "notification_" + methodName,
-            duration.toMillis()
+                "notification_" + methodName,
+                duration.toMillis()
         );
     }
 
@@ -123,8 +123,8 @@ public class RevisionNotificationAspect {
      */
     private void recordFailureMetrics(String methodName, Exception e) {
         revisionMetrics.recordRevisionError(
-            "notification",
-            e.getClass().getSimpleName()
+                "notification",
+                e.getClass().getSimpleName()
         );
     }
 
@@ -132,13 +132,13 @@ public class RevisionNotificationAspect {
      * Handle retry attempt
      */
     private void handleRetryAttempt(String methodName, int attempt, Exception e) {
-        log.warn("Retry attempt {} for method {} failed: {}", 
-            attempt + 1, methodName, e.getMessage());
-        
+        log.warn("Retry attempt {} for method {} failed: {}",
+                attempt + 1, methodName, e.getMessage());
+
         if (attempt > 0) {
             revisionMetrics.recordRevisionError(
-                "notification_retry",
-                "attempt_" + (attempt + 1)
+                    "notification_retry",
+                    "attempt_" + (attempt + 1)
             );
         }
     }
@@ -147,31 +147,31 @@ public class RevisionNotificationAspect {
      * Check if exception is retryable
      */
     private boolean shouldRetry(Exception e) {
-        return e instanceof MessagingException || 
-               e instanceof TimeoutException ||
-               e.getCause() instanceof MessagingException ||
-               e.getCause() instanceof TimeoutException;
+        return e instanceof MessagingException ||
+                e instanceof TimeoutException ||
+                e.getCause() instanceof MessagingException ||
+                e.getCause() instanceof TimeoutException;
     }
 
     /**
      * Handle max retries exceeded
      */
-    private RevisionNotificationException handleMaxRetriesExceeded(String methodName, 
-            Exception lastException) {
-        log.error("Max retries exceeded for method {}: {}", 
-            methodName, lastException.getMessage());
-        
+    private RevisionNotificationException handleMaxRetriesExceeded(String methodName,
+                                                                   Exception lastException) {
+        log.error("Max retries exceeded for method {}: {}",
+                methodName, lastException.getMessage());
+
         return RevisionNotificationException.maxRetriesExceeded(
-            methodName,
-            notificationConfig.getRetryConfig().maxRetries()
+                methodName,
+                notificationConfig.getRetry().getMaxRetries()
         );
     }
 
     /**
      * Handle exception
      */
-    private RevisionNotificationException handleException(Exception e, String methodName, 
-            Object[] args) {
+    private RevisionNotificationException handleException(Exception e, String methodName,
+                                                          Object[] args) {
         log.error("Error in notification method {}: {}", methodName, e.getMessage());
 
         if (e instanceof RevisionNotificationException) {
@@ -181,11 +181,11 @@ public class RevisionNotificationAspect {
         String recipient = extractRecipient(args);
         if (e instanceof MessagingException) {
             return RevisionNotificationException.emailSendingFailed(
-                recipient, e.getMessage(), e);
+                    recipient, e.getMessage(), e);
         }
 
         return RevisionNotificationException.processingError(
-            recipient, 0, e.getMessage(), e);
+                recipient,  e.getMessage(), e);
     }
 
     /**
@@ -193,10 +193,10 @@ public class RevisionNotificationAspect {
      */
     private String extractRecipient(Object[] args) {
         return Arrays.stream(args)
-            .filter(arg -> arg instanceof String)
-            .map(String.class::cast)
-            .findFirst()
-            .orElse("unknown");
+                .filter(arg -> arg instanceof String)
+                .map(String.class::cast)
+                .findFirst()
+                .orElse("unknown");
     }
 
     /**

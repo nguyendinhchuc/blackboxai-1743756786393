@@ -4,6 +4,8 @@ import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.UserSession;
 import com.ecommerce.api.service.UserDetailsServiceImpl;
 import com.ecommerce.api.service.UserSessionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -19,6 +21,8 @@ import java.io.IOException;
 
 @Component
 public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomAuthenticationSuccessHandler.class);
 
     private RequestCache requestCache = new HttpSessionRequestCache();
 
@@ -45,7 +49,7 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // Handle redirect
         SavedRequest savedRequest = requestCache.getRequest(request, response);
-        
+
         if (savedRequest == null) {
             // If no saved request exists, redirect based on user role
             if (authentication.getAuthorities().stream()
@@ -59,10 +63,10 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // Clear saved request
         requestCache.removeRequest(request, response);
-        
+
         // Get the target URL
         String targetUrl = savedRequest.getRedirectUrl();
-        
+
         // Validate the target URL
         if (isValidRedirectUrl(targetUrl)) {
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
@@ -72,7 +76,6 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
     }
 
-    @Override
     public void setRequestCache(RequestCache requestCache) {
         this.requestCache = requestCache;
     }
@@ -101,15 +104,15 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private boolean isAllowedPath(String path) {
         // List of allowed paths
         String[] allowedPaths = {
-            "/admin",
-            "/admin/dashboard",
-            "/admin/products",
-            "/admin/categories",
-            "/admin/banners",
-            "/admin/users",
-            "/admin/profile",
-            "/admin/sessions",
-            "/"
+                "/admin",
+                "/admin/dashboard",
+                "/admin/products",
+                "/admin/categories",
+                "/admin/banners",
+                "/admin/users",
+                "/admin/profile",
+                "/admin/sessions",
+                "/"
         };
 
         // Check if path starts with any allowed path
@@ -123,18 +126,6 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     }
 
     /**
-     * Handle any additional post-authentication logic
-     */
-    private void handlePostAuthentication(HttpServletRequest request, User user) {
-        // Update last login time
-        user.setLastLoginAt(java.time.LocalDateTime.now());
-        userDetailsService.updateUser(user);
-
-        // Log the login activity
-        logLoginActivity(request, user);
-    }
-
-    /**
      * Log login activity
      */
     private void logLoginActivity(HttpServletRequest request, User user) {
@@ -144,10 +135,10 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
 
         String userAgent = request.getHeader("User-Agent");
-        
+
         // TODO: Implement login activity logging
-        logger.info("User {} logged in from IP: {}, User-Agent: {}", 
-                   user.getUsername(), ipAddress, userAgent);
+        logger.info("User {} logged in from IP: {}, User-Agent: {}",
+                user.getUsername(), ipAddress, userAgent);
     }
 
     /**
@@ -164,8 +155,8 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // If there are too many active sessions, consider it suspicious
         if (recentSessionCount > 5) {
-            logger.warn("Suspicious login detected for user {} from IP: {}", 
-                       user.getUsername(), ipAddress);
+            logger.warn("Suspicious login detected for user {} from IP: {}",
+                    user.getUsername(), ipAddress);
             return true;
         }
 

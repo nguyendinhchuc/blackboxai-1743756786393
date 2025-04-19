@@ -3,6 +3,8 @@ package com.ecommerce.api.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "categories")
@@ -26,4 +28,11 @@ public class Category {
 
     @Column(name = "tenant_id")
     private Long tenantId;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    private List<Product> products;
+
+    public Category() {
+        this.products = new ArrayList<>();
+    }
 }

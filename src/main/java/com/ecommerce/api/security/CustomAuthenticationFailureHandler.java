@@ -1,6 +1,8 @@
 package com.ecommerce.api.security;
 
 import com.ecommerce.api.service.UserDetailsServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -16,6 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomAuthenticationFailureHandler.class);
 
     private static final int MAX_ATTEMPTS = 5;
     private static final long LOCK_TIME_DURATION = 15 * 60 * 1000; // 15 minutes in milliseconds
@@ -38,17 +42,17 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         String username = request.getParameter("username");
         String ipAddress = getClientIP(request);
-        
+
         // Handle the failure based on the type of authentication exception
         String errorMessage = determineErrorMessage(exception);
-        
+
         // Check if account is locked
         if (isAccountLocked(username, ipAddress)) {
             long lockTimeRemaining = getRemainingLockTime(username, ipAddress);
             if (lockTimeRemaining > 0) {
                 errorMessage = String.format(
-                    "Account is locked due to multiple failed attempts. Please try again in %d minutes.",
-                    lockTimeRemaining / 60000
+                        "Account is locked due to multiple failed attempts. Please try again in %d minutes.",
+                        lockTimeRemaining / 60000
                 );
                 super.setDefaultFailureUrl("/admin/login?error=locked&lockTime=" + lockTimeRemaining);
             } else {
@@ -58,7 +62,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         } else {
             // Increment failed attempts
             incrementFailedAttempts(username, ipAddress);
-            
+
             // Check if account should be locked
             if (getFailedAttempts(username, ipAddress) >= MAX_ATTEMPTS) {
                 lockAccount(username, ipAddress);
@@ -90,7 +94,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         if (message == null) {
             return "Invalid username or password";
         }
-        
+
         // Customize error message based on exception type
         if (message.contains("Bad credentials")) {
             return "Invalid username or password";
@@ -101,7 +105,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         } else if (message.contains("expired")) {
             return "Account has expired";
         }
-        
+
         return message;
     }
 
@@ -153,13 +157,14 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
     private void logFailedAttempt(HttpServletRequest request, String username, String ipAddress, String errorMessage) {
         String userAgent = request.getHeader("User-Agent");
-        
-        // Log the failed attempt (you might want to save this to a database in production)
-        logger.warn("Failed login attempt - Username: {}, IP: {}, User-Agent: {}, Error: {}", 
-                   username != null ? username : "unknown",
-                   ipAddress,
-                   userAgent,
-                   errorMessage);
+
+        // Log the failed attempt with proper null check for username
+        String safeUsername = username != null ? username : "unknown";
+        logger.warn("Failed login attempt - Username: {}, IP: {}, User-Agent: {}, Error: {}",
+                safeUsername,
+                ipAddress,
+                userAgent,
+                errorMessage);
     }
 
     /**
@@ -171,13 +176,13 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         if (attempts != null && attempts.containsKey("lastFailure")) {
             long lastFailure = (long) attempts.get("lastFailure");
             long timeBetweenAttempts = System.currentTimeMillis() - lastFailure;
-            
+
             // If attempts are too rapid (less than 1 second apart)
             if (timeBetweenAttempts < 1000) {
                 return true;
             }
         }
-        
+
         return false;
     }
 

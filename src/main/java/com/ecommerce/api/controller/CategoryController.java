@@ -31,7 +31,7 @@ public class CategoryController {
 
     @PostMapping
     public Category createCategory(@RequestBody Category category) {
-        return categoryService.createCategory(category);
+        return categoryService.save(category);
     }
 
     @PutMapping("/{id}")
@@ -41,7 +41,7 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
+        categoryService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 }

@@ -9,12 +9,19 @@ import java.util.List;
 @Repository
 public interface BannerRepository extends JpaRepository<Banner, Long> {
     List<Banner> findByTenantIdOrderByDisplayOrderAsc(Long tenantId);
-    
+
     List<Banner> findByTenantIdAndIsActiveTrueAndStartDateBeforeAndEndDateAfterOrderByDisplayOrderAsc(
-        Long tenantId, 
-        LocalDateTime now, 
-        LocalDateTime now2
+            Long tenantId,
+            LocalDateTime now,
+            LocalDateTime now2
     );
-    
+
     List<Banner> findByTenantIdAndIsActiveTrue(Long tenantId);
+
+    /**
+     * Find banners by tenant ID ordered by display order in descending order
+     * @param tenantId the tenant ID
+     * @return list of banners
+     */
+    List<Banner> findByTenantIdOrderByDisplayOrderDesc(Long tenantId);
 }
