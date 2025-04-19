@@ -80,19 +80,4 @@ public class AdminAuthController {
     public String accessDenied() {
         return "admin/access-denied";
     }
-
-    public void init() {
-        // Dashboard calculations
-        long totalProducts = productService.count();
-        long totalCategories = categoryService.count();
-        long activeBanners = bannerService.countActiveBanners();
-        long totalUsers = userRepository.count();
-
-        // You can add logic here to store or use these values as needed
-        // For example, logging or caching the values
-        System.out.println("Dashboard Init - Total Products: " + totalProducts);
-        System.out.println("Dashboard Init - Total Categories: " + totalCategories);
-        System.out.println("Dashboard Init - Active Banners: " + activeBanners);
-        System.out.println("Dashboard Init - Total Users: " + totalUsers);
-    }
 }
