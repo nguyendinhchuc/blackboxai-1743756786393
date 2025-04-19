@@ -55,7 +55,7 @@ public class User {
     private String avatar;
 
     @Column(name = "is_email_verified")
-    private boolean isEmailVerified;
+    private Boolean isEmailVerified;
 
     @Column(name = "is_two_factor_enabled")
     private boolean isTwoFactorEnabled;
@@ -64,7 +64,7 @@ public class User {
     private LocalDateTime lastLogoutAt;
 
     public User() {
-        this.isEmailVerified = false;
+        this.isEmailVerified = true;
         this.isTwoFactorEnabled = false;
         this.avatar = "";
     }
@@ -75,6 +75,8 @@ public class User {
         this.password = password;
         this.firstName = "";
         this.lastName = "";
+        this.isEmailVerified = true;
+        this.isTwoFactorEnabled = true;
     }
 
     public User(String username, String email, String password, Long tenantId, Role role) {
@@ -85,7 +87,7 @@ public class User {
         this.lastName = "";
         this.tenantId = tenantId;
         this.role = role;
-        this.isEmailVerified = false;
+        this.isEmailVerified = true;
         this.isTwoFactorEnabled = false;
         this.avatar = "";
     }
