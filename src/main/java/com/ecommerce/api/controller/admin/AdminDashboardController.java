@@ -26,6 +26,9 @@ public class AdminDashboardController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private StatisticsService statisticsService;
+
     @GetMapping({"", "/"})
     public String dashboard(Model model) {
         // Add counts to the model
@@ -46,6 +49,17 @@ public class AdminDashboardController {
         model.addAttribute("outOfStockProducts", inventoryStats.getOrDefault("outOfStockProducts", 0));
         model.addAttribute("totalStock", inventoryStats.getOrDefault("totalStock", 0));
         model.addAttribute("totalInventoryValue", inventoryStats.getOrDefault("totalInventoryValue", 0));
+
+        // Add user statistics
+        Map<String, Object> userStats = statisticsService.getUserStatistics();
+        model.addAttribute("adminUsers", userStats.getOrDefault("adminUsers", 0));
+        model.addAttribute("customerUsers", userStats.getOrDefault("customerUsers", 0));
+
+        // Add order statistics
+        Map<String, Object> orderStats = statisticsService.getOrderStatistics();
+        model.addAttribute("pendingOrders", orderStats.getOrDefault("pendingOrders", 0));
+        model.addAttribute("completedOrders", orderStats.getOrDefault("completedOrders", 0));
+        model.addAttribute("cancelledOrders", orderStats.getOrDefault("cancelledOrders", 0));
 
         // Add any recent activities (this could be enhanced with a dedicated activity service)
         // model.addAttribute("recentActivities", activityService.getRecentActivities());

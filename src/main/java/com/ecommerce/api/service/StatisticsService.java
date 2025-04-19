@@ -34,6 +34,9 @@ public class StatisticsService {
     @Autowired
     private BannerService bannerService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public Map<String, Object> getRevenueStatistics(LocalDate startDate, LocalDate endDate) {
         Long tenantId = TenantContext.getCurrentTenant().getId();
         List<Payment> payments = paymentRepository.findByTenantId(tenantId);
@@ -93,6 +96,7 @@ public class StatisticsService {
         statistics.put("totalProducts", productService.count());
         statistics.put("totalCategories", categoryService.count());
         statistics.put("activeBanners", bannerService.countActiveBanners());
+        statistics.put("totalUsers", userRepository.count());
         return statistics;
     }
 
@@ -132,7 +136,6 @@ public class StatisticsService {
                     return "inStock";
                 }));
 
-        Map<String, Object> statistics = new HashMap<>();
         statistics.put("totalProducts", totalProducts);
         statistics.put("lowStockProducts", lowStockProducts);
         statistics.put("outOfStockProducts", outOfStockProducts);
@@ -142,4 +145,43 @@ public class StatisticsService {
 
         return statistics;
     }
+
+    public Map<String, Object> getUserStatistics() {
+        Long tenantId = TenantContext.getCurrentTenant().getId();
+        long totalUsers = userRepository.count();
+        long adminUsers = userRepository.countByRole_Name(com.ecommerce.api.model.RoleEnum.ADMIN);
+        long customerUsers = userRepository.countByRole_Name(com.ecommerce.api.model.RoleEnum.CUSTOMER);
+
+        Map<String, Object> statistics = new HashMap<>();
+        statistics.put("totalUsers", totalUsers);
+        statistics.put("adminUsers", adminUsers);
+        statistics.put("customerUsers", customerUsers);
+
+        return statistics;
+    }
+
+    public Map<String, Object> getOrderStatistics() {
+        Long tenantId = TenantContext.getCurrentTenant().getId();
+        List<Payment> payments = paymentRepository.findByTenantId(tenantId);
+
+        long pendingOrders = payments.stream()
+                .filter(p -> "PENDING".equals(p.getStatus()))
+                .count();
+
+        long completedOrders = payments.stream()
+                .filter(p -> "COMPLETED".equals(p.getStatus()))
+                .count();
+
+        long cancelledOrders = payments.stream()
+                .filter(p -> "CANCELLED".equals(p.getStatus()))
+                .count();
+
+        Map<String, Object> statistics = new HashMap<>();
+        statistics.put("pendingOrders", pendingOrders);
+        statistics.put("completedOrders", completedOrders);
+        statistics.put("cancelledOrders", cancelledOrders);
+
+        return statistics;
+    }
+}
 }
