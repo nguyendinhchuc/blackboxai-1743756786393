@@ -41,11 +41,11 @@ public class RevisionNotificationScheduler {
     @Scheduled(cron = RevisionNotificationConstants.HOURLY_METRICS_CRON)
     public void monitorMetrics() {
         try {
-            log.debug("Running notification metrics monitoring");
+            log.info("Running notification metrics monitoring");
             Map<String, Object> stats = notificationService.getNotificationStats();
             checkMetricsThresholds(stats);
             updateMetrics(stats);
-            log.debug("Notification metrics monitoring completed");
+            log.info("Notification metrics monitoring completed");
         } catch (Exception e) {
             log.error("Error monitoring notification metrics: {}", e.getMessage(), e);
             errorCount.incrementAndGet();
@@ -58,15 +58,15 @@ public class RevisionNotificationScheduler {
     @Scheduled(cron = RevisionNotificationConstants.DAILY_CLEANUP_CRON)
     public void cleanupCache() {
         try {
-            log.debug("Running notification cache cleanup");
+            log.info("Running notification cache cleanup");
             notificationCache.clearAllCaches();
             lastCleanupTime.set(System.currentTimeMillis());
-            
+
             // Reset counters after cleanup
             notificationCount.set(0);
             errorCount.set(0);
-            
-            log.debug("Notification cache cleanup completed");
+
+            log.info("Notification cache cleanup completed");
         } catch (Exception e) {
             log.error("Error cleaning up notification cache: {}", e.getMessage(), e);
             errorCount.incrementAndGet();
@@ -79,16 +79,17 @@ public class RevisionNotificationScheduler {
     @Scheduled(cron = RevisionNotificationConstants.RATE_LIMIT_CLEANUP_CRON)
     public void monitorNotificationQueue() {
         try {
+            log.info("Running notification queue monitoring");
             int queueSize = notificationMetrics.getCurrentQueueSize();
             Duration oldestMessage = Duration.ofMillis(notificationMetrics.getOldestMessageAge());
-            
-            if (queueSize > RevisionNotificationConstants.QUEUE_WARNING_SIZE || 
-                oldestMessage.toMinutes() > RevisionNotificationConstants.QUEUE_WARNING_AGE_MINUTES) {
+
+            if (queueSize > RevisionNotificationConstants.QUEUE_WARNING_SIZE ||
+                    oldestMessage.toMinutes() > RevisionNotificationConstants.QUEUE_WARNING_AGE_MINUTES) {
                 String alert = String.format(
-                    "Notification queue alert: Size=%d, Oldest message=%d minutes",
-                    queueSize, oldestMessage.toMinutes()
+                        "Notification queue alert: Size=%d, Oldest message=%d minutes",
+                        queueSize, oldestMessage.toMinutes()
                 );
-                
+
                 notificationPublisher.publishSystemAlert("Queue Health Warning", alert);
             }
         } catch (Exception e) {
@@ -103,17 +104,17 @@ public class RevisionNotificationScheduler {
     @Scheduled(cron = RevisionNotificationConstants.WEEKLY_SUMMARY_CRON)
     public void sendWeeklySummary() {
         if (!notificationConfig.isEmailEnabled()) {
-            log.debug("Email notifications are disabled. Skipping weekly summary.");
+            log.info("Email notifications are disabled. Skipping weekly summary.");
             return;
         }
 
         try {
             Map<String, Object> stats = notificationService.getNotificationStats();
             String summary = formatWeeklySummary(stats);
-            
+
             notificationPublisher.publishSystemAlert(
-                "Weekly Notification Summary",
-                summary
+                    "Weekly Notification Summary",
+                    summary
             );
 
             log.info("Weekly summary notification sent successfully");
@@ -130,26 +131,26 @@ public class RevisionNotificationScheduler {
         double successRate = (double) stats.get("successRate");
         if (successRate < RevisionNotificationConstants.SUCCESS_RATE_CRITICAL) {
             notificationPublisher.publishSystemAlert(
-                "Success Rate Critical",
-                String.format("Current success rate: %.2f%%", successRate)
+                    "Success Rate Critical",
+                    String.format("Current success rate: %.2f%%", successRate)
             );
         } else if (successRate < RevisionNotificationConstants.SUCCESS_RATE_WARNING) {
             notificationPublisher.publishSystemAlert(
-                "Success Rate Warning",
-                String.format("Current success rate: %.2f%%", successRate)
+                    "Success Rate Warning",
+                    String.format("Current success rate: %.2f%%", successRate)
             );
         }
 
         double avgDeliveryTime = (double) stats.get("averageDeliveryTime");
         if (avgDeliveryTime > RevisionNotificationConstants.DELIVERY_TIME_CRITICAL) {
             notificationPublisher.publishSystemAlert(
-                "Delivery Time Critical",
-                String.format("Average delivery time: %.2f ms", avgDeliveryTime)
+                    "Delivery Time Critical",
+                    String.format("Average delivery time: %.2f ms", avgDeliveryTime)
             );
         } else if (avgDeliveryTime > RevisionNotificationConstants.DELIVERY_TIME_WARNING) {
             notificationPublisher.publishSystemAlert(
-                "Delivery Time Warning",
-                String.format("Average delivery time: %.2f ms", avgDeliveryTime)
+                    "Delivery Time Warning",
+                    String.format("Average delivery time: %.2f ms", avgDeliveryTime)
             );
         }
     }
@@ -161,8 +162,8 @@ public class RevisionNotificationScheduler {
         notificationMetrics.recordNotificationSent("TOTAL", "INFO");
         notificationMetrics.recordDeliveryTime((long) stats.get("averageDeliveryTime"));
         notificationMetrics.updateQueueMetrics(
-            (int) stats.get("queueSize"),
-            (long) stats.get("oldestMessageAge")
+                (int) stats.get("queueSize"),
+                (long) stats.get("oldestMessageAge")
         );
     }
 
@@ -178,11 +179,11 @@ public class RevisionNotificationScheduler {
             - Total Errors: %d
             - Cache Hit Rate: %.2f%%
             """,
-            stats.get("totalSent"),
-            stats.get("successRate"),
-            stats.get("averageDeliveryTime"),
-            stats.get("totalErrors"),
-            ((Map<String, Object>) stats.get("cacheStats")).get("hitRate")
+                stats.get("totalSent"),
+                stats.get("successRate"),
+                stats.get("averageDeliveryTime"),
+                stats.get("totalErrors"),
+                ((Map<String, Object>) stats.get("cacheStats")).get("hitRate")
         );
     }
 

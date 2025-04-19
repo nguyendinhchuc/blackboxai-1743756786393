@@ -25,12 +25,6 @@ server:
   servlet:
     context-path: /api
 
-jwt:
-  secret: your-secret-key
-  expiration: 86400000 # 24 hours
-  header: Authorization
-  prefix: Bearer
-
 cors:
   allowed-origins: "*"
   allowed-methods: "*"
@@ -90,16 +84,15 @@ revision:
         mail.smtp.connectiontimeout: 5000
         mail.smtp.writetimeout: 5000
         mail.smtp.from: noreply@example.com
-
     recipients:
-      admins:
-        - admin@example.com
-      developers:
-        - dev@example.com
+      users:
+        - user@example.com
       managers:
         - manager@example.com
-      auditors:
-        - auditor@example.com
+      developers:
+        - dev@example.com
+      administrators:
+        - admin@example.com
 
     templates:
       base-dir: templates/notification/
@@ -183,3 +176,9 @@ app:
     enable-cors: true
     enable-cache: true
     enable-compression: true
+  jwt:
+    secret: Y2h1Y2JiX3NlY3JldF9rZXlfZm9yX2p3dF90b2tlbl9zaWduaW5nXzIwMjQ
+    expiration: 86400000 # 24 hours
+    header: Authorization
+    prefix: Bearer
+    refresh-expiration: 604800000 # 7 days

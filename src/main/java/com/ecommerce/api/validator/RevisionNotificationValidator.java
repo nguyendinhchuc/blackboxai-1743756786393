@@ -20,7 +20,7 @@ public class RevisionNotificationValidator {
 
     // Email validation pattern
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
-        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
+            "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
     );
 
     /**
@@ -61,8 +61,8 @@ public class RevisionNotificationValidator {
 
         if (recipients.size() > RevisionNotificationConstants.MAX_RECIPIENTS_PER_EMAIL) {
             throw RevisionNotificationException.invalidEmailRecipient(
-                String.format("Too many recipients (max: %d)", 
-                    RevisionNotificationConstants.MAX_RECIPIENTS_PER_EMAIL)
+                    String.format("Too many recipients (max: %d)",
+                            RevisionNotificationConstants.MAX_RECIPIENTS_PER_EMAIL)
             );
         }
 
@@ -79,7 +79,7 @@ public class RevisionNotificationValidator {
 
         if (!EMAIL_PATTERN.matcher(email).matches()) {
             throw RevisionNotificationException.invalidEmailRecipient(
-                String.format("Invalid email address format: %s", email)
+                    String.format("Invalid email address format: %s", email)
             );
         }
     }
@@ -94,8 +94,23 @@ public class RevisionNotificationValidator {
 
         if (subject.length() > RevisionNotificationConstants.MAX_SUBJECT_LENGTH) {
             throw RevisionNotificationException.invalidContent(
-                String.format("Subject exceeds maximum length of %d characters", 
-                    RevisionNotificationConstants.MAX_SUBJECT_LENGTH)
+                    String.format("Subject exceeds maximum length of %d characters",
+                            RevisionNotificationConstants.MAX_SUBJECT_LENGTH)
+            );
+        }
+    }
+
+    /**
+     * Validate a single email recipient
+     */
+    public void validateEmailRecipient(String recipient) {
+        if (StringUtils.isBlank(recipient)) {
+            throw RevisionNotificationException.invalidEmailRecipient("Email recipient is blank");
+        }
+
+        if (!EMAIL_PATTERN.matcher(recipient).matches()) {
+            throw RevisionNotificationException.invalidEmailRecipient(
+                    String.format("Invalid email recipient format: %s", recipient)
             );
         }
     }
@@ -110,8 +125,8 @@ public class RevisionNotificationValidator {
 
         if (content.length() > RevisionNotificationConstants.MAX_CONTENT_LENGTH) {
             throw RevisionNotificationException.invalidContent(
-                String.format("Content exceeds maximum length of %d characters", 
-                    RevisionNotificationConstants.MAX_CONTENT_LENGTH)
+                    String.format("Content exceeds maximum length of %d characters",
+                            RevisionNotificationConstants.MAX_CONTENT_LENGTH)
             );
         }
     }
@@ -120,11 +135,11 @@ public class RevisionNotificationValidator {
      * Validate stack trace
      */
     public void validateStackTrace(String stackTrace) {
-        if (StringUtils.isNotBlank(stackTrace) && 
-            stackTrace.length() > RevisionNotificationConstants.MAX_STACK_TRACE_LENGTH) {
+        if (StringUtils.isNotBlank(stackTrace) &&
+                stackTrace.length() > RevisionNotificationConstants.MAX_STACK_TRACE_LENGTH) {
             throw RevisionNotificationException.invalidContent(
-                String.format("Stack trace exceeds maximum length of %d characters", 
-                    RevisionNotificationConstants.MAX_STACK_TRACE_LENGTH)
+                    String.format("Stack trace exceeds maximum length of %d characters",
+                            RevisionNotificationConstants.MAX_STACK_TRACE_LENGTH)
             );
         }
     }
@@ -155,7 +170,7 @@ public class RevisionNotificationValidator {
 
         if (!templateName.matches("^[a-zA-Z0-9-]+$")) {
             throw RevisionNotificationException.invalidContent(
-                "Template name contains invalid characters"
+                    "Template name contains invalid characters"
             );
         }
     }
@@ -166,7 +181,7 @@ public class RevisionNotificationValidator {
     public void validateTemplateData(String templateName, Object data) {
         if (data == null) {
             throw RevisionNotificationException.invalidTemplateData(
-                templateName, "Template data is null"
+                    templateName, "Template data is null"
             );
         }
     }
@@ -183,7 +198,7 @@ public class RevisionNotificationValidator {
             RevisionNotificationConfig.NotificationType.valueOf(type);
         } catch (IllegalArgumentException e) {
             throw RevisionNotificationException.invalidNotificationType(
-                String.format("Invalid notification type: %s", type)
+                    String.format("Invalid notification type: %s", type)
             );
         }
     }
@@ -194,13 +209,13 @@ public class RevisionNotificationValidator {
     public void validateRateLimitConfig(int maxRequests, int windowMinutes) {
         if (maxRequests <= 0) {
             throw RevisionNotificationException.configurationError(
-                "Maximum requests must be greater than 0"
+                    "Maximum requests must be greater than 0"
             );
         }
 
         if (windowMinutes <= 0) {
             throw RevisionNotificationException.configurationError(
-                "Rate limit window must be greater than 0 minutes"
+                    "Rate limit window must be greater than 0 minutes"
             );
         }
     }
@@ -211,13 +226,13 @@ public class RevisionNotificationValidator {
     public void validateRetryConfig(int maxRetries, int delaySeconds) {
         if (maxRetries < 0) {
             throw RevisionNotificationException.configurationError(
-                "Maximum retries cannot be negative"
+                    "Maximum retries cannot be negative"
             );
         }
 
         if (delaySeconds <= 0) {
             throw RevisionNotificationException.configurationError(
-                "Retry delay must be greater than 0 seconds"
+                    "Retry delay must be greater than 0 seconds"
             );
         }
     }
@@ -228,7 +243,7 @@ public class RevisionNotificationValidator {
     public void validateQueueConfig(int queueSize) {
         if (queueSize <= 0) {
             throw RevisionNotificationException.configurationError(
-                "Queue size must be greater than 0"
+                    "Queue size must be greater than 0"
             );
         }
     }

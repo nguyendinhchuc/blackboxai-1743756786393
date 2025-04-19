@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.Duration;
 
 @Configuration
-@ConfigurationProperties(prefix = "app.jwt")
+//@ConfigurationProperties(prefix = "app.jwt")
 @Validated
 public class JwtConfig {
 

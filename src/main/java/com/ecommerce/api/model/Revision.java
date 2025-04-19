@@ -1,6 +1,7 @@
 package com.ecommerce.api.model;
 
 import com.ecommerce.api.config.AuditConfig;
+import com.ecommerce.api.config.CustomRevisionListener;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.RevisionEntity;
@@ -8,7 +9,6 @@ import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
 
 import jakarta.persistence.*;
-import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Entity
 @Table(name = "revisions")
-@RevisionEntity(AuditConfig.CustomRevisionListener.class)
+@RevisionEntity(CustomRevisionListener.class)
 @Getter
 @Setter
 public class Revision extends BaseEntity {

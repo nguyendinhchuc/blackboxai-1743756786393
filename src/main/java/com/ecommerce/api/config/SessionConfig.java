@@ -2,6 +2,7 @@ package com.ecommerce.api.config;
 
 import com.ecommerce.api.service.UserSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.session.SessionRegistry;
@@ -17,6 +18,7 @@ import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 public class SessionConfig {
 
     @Autowired
+    @Lazy
     private UserSessionService userSessionService;
 
     @Bean

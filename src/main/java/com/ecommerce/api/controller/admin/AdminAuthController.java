@@ -27,7 +27,7 @@ public class AdminAuthController {
             @RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "logout", required = false) String logout,
             Model model) {
-        
+
         if (error != null) {
             model.addAttribute("error", "Invalid username or password!");
         }
@@ -54,16 +54,6 @@ public class AdminAuthController {
         return "redirect:/admin/login?logout";
     }
 
-    @GetMapping("/profile")
-    public String profile(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated()) {
-            User user = userDetailsService.getCurrentUser();
-            model.addAttribute("user", user);
-            return "admin/profile";
-        }
-        return "redirect:/admin/login";
-    }
 
     @GetMapping("/access-denied")
     public String accessDenied() {

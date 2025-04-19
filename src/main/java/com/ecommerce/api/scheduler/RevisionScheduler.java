@@ -37,9 +37,9 @@ public class RevisionScheduler {
         try {
             long thresholdTimestamp = revisionConfiguration.getCleanupThresholdTimestamp();
             revisionRepository.deleteOldRevisions(thresholdTimestamp);
-            
-            log.info("Completed revision cleanup task. Deleted {} old revisions", 
-                deletedCount.get());
+
+            log.info("Completed revision cleanup task. Deleted {} old revisions",
+                    deletedCount.get());
         } catch (Exception e) {
             log.error("Error during revision cleanup task: {}", e.getMessage(), e);
         }
@@ -57,10 +57,10 @@ public class RevisionScheduler {
         try {
             // Get all unique entity names and IDs
             List<Object[]> entityGroups = revisionRepository.findAll()
-                .stream()
-                .map(revision -> new Object[]{revision.getEntityName(), revision.getEntityId()})
-                .distinct()
-                .toList();
+                    .stream()
+                    .map(revision -> new Object[]{revision.getEntityName(), revision.getEntityId()})
+                    .distinct()
+                    .toList();
 
             // Process each entity group
             entityGroups.forEach(group -> {
@@ -69,25 +69,25 @@ public class RevisionScheduler {
 
                 // Get revision count for this entity
                 long revisionCount = revisionRepository.countByEntityNameAndEntityId(
-                    entityName, entityId);
+                        entityName, entityId);
 
                 // If count exceeds limit, delete oldest excess revisions
                 if (revisionConfiguration.hasTooManyRevisions(revisionCount)) {
                     int toDelete = (int) (revisionCount - revisionConfiguration.getMaxRevisionsPerEntity());
                     List<Revision> oldestRevisions = revisionRepository
-                        .findByEntityNameAndEntityId(entityName, entityId)
-                        .stream()
-                        .sorted((r1, r2) -> Long.compare(r1.getTimestamp(), r2.getTimestamp()))
-                        .limit(toDelete)
-                        .toList();
+                            .findByEntityNameAndEntityId(entityName, entityId)
+                            .stream()
+                            .sorted((r1, r2) -> Long.compare(r1.getTimestamp(), r2.getTimestamp()))
+                            .limit(toDelete)
+                            .toList();
 
                     revisionRepository.deleteAll(oldestRevisions);
                     deletedCount.addAndGet(oldestRevisions.size());
                 }
             });
 
-            log.info("Completed excess revision cleanup task. Deleted {} excess revisions", 
-                deletedCount.get());
+            log.info("Completed excess revision cleanup task. Deleted {} excess revisions",
+                    deletedCount.get());
         } catch (Exception e) {
             log.error("Error during excess revision cleanup task: {}", e.getMessage(), e);
         }
@@ -113,19 +113,19 @@ public class RevisionScheduler {
 
             // Get counts for different time periods
             Map<String, Long> stats = Map.of(
-                "total", revisionRepository.count(),
-                "lastDay", countRevisionsSince(dayTimestamp),
-                "lastWeek", countRevisionsSince(weekTimestamp),
-                "lastMonth", countRevisionsSince(monthTimestamp)
+                    "total", revisionRepository.count(),
+                    "lastDay", countRevisionsSince(dayTimestamp),
+                    "lastWeek", countRevisionsSince(weekTimestamp),
+                    "lastMonth", countRevisionsSince(monthTimestamp)
             );
 
             // Get counts by revision type
             Map<Revision.RevisionType, Long> typeStats = Map.of(
-                Revision.RevisionType.INSERT, 
+                    Revision.RevisionType.INSERT,
                     revisionRepository.countByRevisionType(Revision.RevisionType.INSERT),
-                Revision.RevisionType.UPDATE, 
+                    Revision.RevisionType.UPDATE,
                     revisionRepository.countByRevisionType(Revision.RevisionType.UPDATE),
-                Revision.RevisionType.DELETE, 
+                    Revision.RevisionType.DELETE,
                     revisionRepository.countByRevisionType(Revision.RevisionType.DELETE)
             );
 
@@ -169,12 +169,12 @@ public class RevisionScheduler {
 
             do {
                 page = revisionRepository.findAll(PageRequest.of(pageNumber, pageSize));
-                
+
                 page.getContent().forEach(revision -> {
                     String changes = revision.getChanges();
                     if (changes != null && changes.length() > revisionConfiguration.getCompressionThreshold()) {
                         String compressed = revisionConfiguration.revisionDataProcessor()
-                            .processData(changes);
+                                .processData(changes);
                         revision.setChanges(compressed);
                         revisionRepository.save(revision);
                         compressedCount.incrementAndGet();
@@ -182,10 +182,14 @@ public class RevisionScheduler {
                 });
 
                 pageNumber++;
+                if (pageNumber > 100) {
+                    log.warn("Compression task aborted after 100 pages to prevent infinite loop");
+                    break;
+                }
             } while (page.hasNext());
 
-            log.info("Completed revision compression task. Compressed {} revisions", 
-                compressedCount.get());
+            log.info("Completed revision compression task. Compressed {} revisions",
+                    compressedCount.get());
         } catch (Exception e) {
             log.error("Error during revision compression task: {}", e.getMessage(), e);
         }

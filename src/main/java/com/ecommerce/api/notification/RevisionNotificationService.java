@@ -41,8 +41,8 @@ public class RevisionNotificationService {
      * Send revision notification
      */
     @Async
-    public CompletableFuture<Void> sendRevisionNotification(Revision revision, 
-            NotificationType type, List<String> recipients) {
+    public CompletableFuture<Void> sendRevisionNotification(Revision revision,
+                                                            NotificationType type, List<String> recipients) {
         Timer.Sample timer = notificationMetrics.startNotificationTimer();
         String notificationId = generateNotificationId();
 
@@ -70,8 +70,8 @@ public class RevisionNotificationService {
             notificationMetrics.recordNotificationSent(type.name(), "INFO");
             timer.stop(notificationMetrics.getNotificationDeliveryTimer());
 
-            log.info("Revision notification sent successfully: id={}, type={}", 
-                notificationId, type);
+            log.info("Revision notification sent successfully: id={}, type={}",
+                    notificationId, type);
             return CompletableFuture.completedFuture(null);
         } catch (Exception e) {
             handleNotificationError(e, notificationId, type, timer);
@@ -83,8 +83,8 @@ public class RevisionNotificationService {
      * Send system alert
      */
     @Async
-    public CompletableFuture<Void> sendSystemAlert(String message, String details, 
-            List<String> recipients) {
+    public CompletableFuture<Void> sendSystemAlert(String message, String details,
+                                                   List<String> recipients) {
         Timer.Sample timer = notificationMetrics.startNotificationTimer();
         String notificationId = generateNotificationId();
 
@@ -95,9 +95,9 @@ public class RevisionNotificationService {
 
             // Prepare template data
             Map<String, Object> templateData = Map.of(
-                "message", message,
-                "details", details,
-                "timestamp", LocalDateTime.now()
+                    "message", message,
+                    "details", details,
+                    "timestamp", LocalDateTime.now()
             );
 
             // Process template
@@ -122,8 +122,8 @@ public class RevisionNotificationService {
      * Send error notification
      */
     @Async
-    public CompletableFuture<Void> sendErrorNotification(String error, String stackTrace, 
-            List<String> recipients) {
+    public CompletableFuture<Void> sendErrorNotification(String error, String stackTrace,
+                                                         List<String> recipients) {
         Timer.Sample timer = notificationMetrics.startNotificationTimer();
         String notificationId = generateNotificationId();
 
@@ -134,9 +134,9 @@ public class RevisionNotificationService {
 
             // Prepare template data
             Map<String, Object> templateData = Map.of(
-                "error", error,
-                "stackTrace", stackTrace,
-                "timestamp", LocalDateTime.now()
+                    "error", error,
+                    "stackTrace", stackTrace,
+                    "timestamp", LocalDateTime.now()
             );
 
             // Process template
@@ -162,7 +162,7 @@ public class RevisionNotificationService {
      */
     @Async
     public CompletableFuture<Void> sendCleanupNotification(Integer deletedCount, String reason,
-            List<String> recipients) {
+                                                           List<String> recipients) {
         Timer.Sample timer = notificationMetrics.startNotificationTimer();
         String notificationId = generateNotificationId();
 
@@ -173,17 +173,17 @@ public class RevisionNotificationService {
 
             // Prepare template data
             Map<String, Object> templateData = Map.of(
-                "deletedCount", deletedCount,
-                "reason", reason,
-                "timestamp", LocalDateTime.now()
+                    "deletedCount", deletedCount,
+                    "reason", reason,
+                    "timestamp", LocalDateTime.now()
             );
 
             // Process template
             String content = processTemplate("cleanup-report", templateData);
 
             // Send email
-            sendEmail(recipients, "Cleanup Report: " + deletedCount + " Revisions Deleted", 
-                content, notificationId);
+            sendEmail(recipients, "Cleanup Report: " + deletedCount + " Revisions Deleted",
+                    content, notificationId);
 
             // Record metrics
             notificationMetrics.recordNotificationSent("CLEANUP_REPORT", "INFO");
@@ -206,16 +206,16 @@ public class RevisionNotificationService {
             context.setVariables(data);
             return templateEngine.process(templateName, context);
         } catch (Exception e) {
-            throw RevisionNotificationException.templateProcessingFailed(templateName, 
-                e.getMessage(), e);
+            throw RevisionNotificationException.templateProcessingFailed(templateName,
+                    e.getMessage(), e);
         }
     }
 
     /**
      * Send email
      */
-    private void sendEmail(List<String> recipients, String subject, String content, 
-            String notificationId) throws MessagingException {
+    private void sendEmail(List<String> recipients, String subject, String content,
+                           String notificationId) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -231,10 +231,10 @@ public class RevisionNotificationService {
     /**
      * Handle notification error
      */
-    private void handleNotificationError(Exception e, String notificationId, 
-            NotificationType type, Timer.Sample timer) {
-        log.error("Error sending notification: id={}, type={}, error={}", 
-            notificationId, type, e.getMessage(), e);
+    private void handleNotificationError(Exception e, String notificationId,
+                                         NotificationType type, Timer.Sample timer) {
+        log.error("Error sending notification: id={}, type={}, error={}",
+                notificationId, type, e.getMessage(), e);
 
         notificationMetrics.recordNotificationError(type.name(), e.getClass().getSimpleName());
         timer.stop(notificationMetrics.getNotificationDeliveryTimer());
@@ -245,14 +245,14 @@ public class RevisionNotificationService {
             throw (RevisionNotificationException) e;
         }
         throw RevisionNotificationException.emailSendingFailed(
-            notificationId, e.getMessage(), e);
+                notificationId, e.getMessage(), e);
     }
 
     /**
      * Prepare revision template data
      */
-    private Map<String, Object> prepareRevisionTemplateData(Revision revision, 
-            NotificationType type) {
+    private Map<String, Object> prepareRevisionTemplateData(Revision revision,
+                                                            NotificationType type) {
         Map<String, Object> data = new HashMap<>();
         data.put("revision", revision);
         data.put("type", type);
@@ -285,8 +285,8 @@ public class RevisionNotificationService {
      * Generate notification ID
      */
     private String generateNotificationId() {
-        return "notif_" + System.currentTimeMillis() + "_" + 
-            String.format("%04d", (int) (Math.random() * 10000));
+        return "notif_" + System.currentTimeMillis() + "_" +
+                String.format("%04d", (int) (Math.random() * 10000));
     }
 
     /**
@@ -294,12 +294,28 @@ public class RevisionNotificationService {
      */
     public Map<String, Object> getNotificationStats() {
         return Map.of(
-            "totalSent", notificationMetrics.getTotalNotificationsSent(),
-            "totalErrors", notificationMetrics.getTotalNotificationErrors(),
-            "averageDeliveryTime", notificationMetrics.getAverageDeliveryTime(),
-            "successRate", notificationMetrics.getDeliverySuccessRate(),
-            "cacheStats", notificationCache.getCacheStatistics()
+                "totalSent", notificationMetrics.getTotalNotificationsSent(),
+                "totalErrors", notificationMetrics.getTotalNotificationErrors(),
+                "averageDeliveryTime", notificationMetrics.getAverageDeliveryTime(),
+                "successRate", notificationMetrics.getDeliverySuccessRate(),
+                "cacheStats", notificationCache.getCacheStatistics()
         );
+    }
+
+    public long getTotalNotificationsSent() {
+        return notificationMetrics.getTotalNotificationsSent();
+    }
+
+    public long getTotalNotificationErrors() {
+        return notificationMetrics.getTotalNotificationErrors();
+    }
+
+    public double getAverageDeliveryTime() {
+        return notificationMetrics.getAverageDeliveryTime();
+    }
+
+    public double getDeliverySuccessRate() {
+        return notificationMetrics.getDeliverySuccessRate();
     }
 
     /**

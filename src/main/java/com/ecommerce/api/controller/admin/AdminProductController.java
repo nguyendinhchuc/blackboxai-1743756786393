@@ -101,9 +101,6 @@ public class AdminProductController {
             redirectAttributes.addFlashAttribute("success", "Product created successfully");
             return "redirect:/admin/products";
             
-        } catch (IOException e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to upload images: " + e.getMessage());
-            return "redirect:/admin/products/new";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to create product: " + e.getMessage());
             return "redirect:/admin/products/new";
@@ -142,9 +139,6 @@ public class AdminProductController {
             redirectAttributes.addFlashAttribute("success", "Product updated successfully");
             return "redirect:/admin/products";
             
-        } catch (IOException e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to upload images: " + e.getMessage());
-            return "redirect:/admin/products/" + id + "/edit";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to update product: " + e.getMessage());
             return "redirect:/admin/products/" + id + "/edit";

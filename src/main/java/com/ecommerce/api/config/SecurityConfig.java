@@ -41,16 +41,14 @@ public class SecurityConfig {
     @Autowired
     private CustomLogoutSuccessHandler logoutSuccessHandler;
 
-    @Bean
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configureAuthenticationManager(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
-    @Bean
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configureHttpSecurity(HttpSecurity http) throws Exception {
         http
-            .cors().and().csrf().disable()
-            .sessionManagement()
+                .cors().and().csrf().disable()
+                .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
@@ -58,36 +56,36 @@ public class SecurityConfig {
                 .and()
                 .invalidSessionUrl("/admin/login?invalid=true")
                 .and()
-            .authorizeRequests()
+                .authorizeRequests()
                 // Public routes
                 .requestMatchers("/", "/home", "/about").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/fonts/**", "/webjars/**").permitAll()
-                
+
                 // Swagger UI
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                
+
                 // Admin routes
                 .requestMatchers("/admin/login", "/admin/logout").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                
+
                 // API routes
                 .requestMatchers("/api/products/**").permitAll()
                 .requestMatchers("/api/categories/**").permitAll()
                 .requestMatchers("/api/banners/**").permitAll()
-                
+
                 // Secure all other routes
                 .anyRequest().authenticated()
                 .and()
-            .formLogin()
+                .formLogin()
                 .loginPage("/admin/login")
                 .loginProcessingUrl("/admin/login")
                 .successHandler(authenticationSuccessHandler)
                 .failureHandler(authenticationFailureHandler)
                 .permitAll()
                 .and()
-            .logout()
+                .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/admin/logout"))
                 .logoutSuccessHandler(logoutSuccessHandler)
                 .deleteCookies("JSESSIONID", "remember-me")
@@ -95,13 +93,13 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .permitAll()
                 .and()
-            .rememberMe()
+                .rememberMe()
                 .key("uniqueAndSecret")
                 .tokenValiditySeconds(86400) // 1 day
                 .rememberMeParameter("remember-me")
                 .userDetailsService(userDetailsService)
                 .and()
-            .exceptionHandling()
+                .exceptionHandling()
                 .accessDeniedPage("/admin/access-denied");
 
         // Add JWT filter
