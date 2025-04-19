@@ -27,6 +27,9 @@ public class RevisionNotificationConfig {
     private RecipientConfig recipients = new RecipientConfig();
 
     @Valid
+    private LevelsConfig levels = new LevelsConfig();
+
+    @Valid
     private RateLimitConfig rateLimit = new RateLimitConfig();
 
     @Valid
@@ -37,6 +40,7 @@ public class RevisionNotificationConfig {
 
     @Valid
     private TemplateConfig template = new TemplateConfig();
+
 
     /**
      * Email configuration
@@ -72,6 +76,17 @@ public class RevisionNotificationConfig {
 
         @Min(1000)
         private Integer writeTimeout = RevisionNotificationConstants.DEFAULT_EMAIL_TIMEOUT;
+    }
+
+    /**
+     * Levels configuration
+     */
+    @Data
+    public static class LevelsConfig {
+        private boolean error = true;
+        private boolean warning = true;
+        private boolean info = true;
+        private boolean debug = true;
     }
 
     /**

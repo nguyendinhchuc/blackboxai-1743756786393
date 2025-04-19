@@ -13,6 +13,14 @@ public class ProductImage {
 
     private String imageUrl;
 
+    private String fileName;
+
+    private String contentType;
+
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] data;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;

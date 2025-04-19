@@ -88,7 +88,12 @@ public class AdminProductController {
             if (images != null && images.length > 0) {
                 for (MultipartFile image : images) {
                     if (!image.isEmpty()) {
-                        productService.addProductImage(savedProduct, image);
+                        try {
+                            ProductImage productImage = convertToProductImage(image);
+                            productService.addProductImage(savedProduct, productImage);
+                        } catch (IOException ex) {
+                            redirectAttributes.addFlashAttribute("error", "Failed to process image " + image.getOriginalFilename() + ": " + ex.getMessage());
+                        }
                     }
                 }
             }
@@ -124,7 +129,12 @@ public class AdminProductController {
             if (images != null && images.length > 0) {
                 for (MultipartFile image : images) {
                     if (!image.isEmpty()) {
-                        productService.addProductImage(updatedProduct, image);
+                        try {
+                            ProductImage productImage = convertToProductImage(image);
+                            productService.addProductImage(updatedProduct, productImage);
+                        } catch (IOException ex) {
+                            redirectAttributes.addFlashAttribute("error", "Failed to process image " + image.getOriginalFilename() + ": " + ex.getMessage());
+                        }
                     }
                 }
             }
@@ -161,5 +171,13 @@ public class AdminProductController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to delete image: " + e.getMessage());
         }
+    }
+
+    private ProductImage convertToProductImage(MultipartFile file) throws IOException {
+        ProductImage productImage = new ProductImage();
+        productImage.setFileName(file.getOriginalFilename());
+        productImage.setContentType(file.getContentType());
+        productImage.setData(file.getBytes());
+        return productImage;
     }
 }
