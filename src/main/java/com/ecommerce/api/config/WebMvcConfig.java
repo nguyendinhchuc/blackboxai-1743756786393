@@ -6,10 +6,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import com.ecommerce.api.converter.ProductImageConverter;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(new ProductImageConverter());
+    }
 
     @Autowired
     private SessionInterceptor sessionInterceptor;
@@ -19,16 +26,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(sessionInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
-                    "/static/**",
-                    "/css/**",
-                    "/js/**",
-                    "/images/**",
-                    "/fonts/**",
-                    "/webjars/**",
-                    "/favicon.ico",
-                    "/error",
-                    "/admin/login",
-                    "/admin/logout"
+                        "/static/**",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/fonts/**",
+                        "/webjars/**",
+                        "/favicon.ico",
+                        "/error",
+                        "/admin/login",
+                        "/admin/logout"
                 );
     }
 
@@ -37,24 +44,24 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // Register resource handlers for static resources
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/");
-        
+
         registry.addResourceHandler("/css/**")
                 .addResourceLocations("classpath:/static/css/");
-        
+
         registry.addResourceHandler("/js/**")
                 .addResourceLocations("classpath:/static/js/");
-        
+
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/static/images/");
-        
+
         registry.addResourceHandler("/fonts/**")
                 .addResourceLocations("classpath:/static/fonts/");
-        
+
         // WebJars resource handler
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/")
                 .resourceChain(false);
-        
+
         // File upload directory
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:uploads/");

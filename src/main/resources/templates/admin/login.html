@@ -45,8 +45,8 @@
             <span class="block sm:inline">Bạn đã đăng xuất thành công.</span>
         </div>
 
-        <form class="mt-8 space-y-6" action="/admin/login" method="POST">
-            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+        <form class="mt-8 space-y-6" action="/login" method="POST">
+<!--            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />-->
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>
                     <label for="username" class="sr-only">Tên đăng nhập</label>

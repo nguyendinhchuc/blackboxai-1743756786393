@@ -36,14 +36,14 @@ public class ProductService {
     @Transactional
     public Product createProduct(Product product) {
         Product savedProduct = productRepository.save(product);
-        
+
         if (product.getImages() != null) {
             for (ProductImage image : product.getImages()) {
                 image.setProduct(savedProduct);
                 productImageRepository.save(image);
             }
         }
-        
+
         return savedProduct;
     }
 
@@ -95,9 +95,12 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public void addProductImage(Product product, com.ecommerce.api.model.ProductImage image) {
+    @Transactional
+    public void addProductImage(Product product, ProductImage image) {
         image.setProduct(product);
+        product.getImages().add(image);
         productImageRepository.save(image);
+        productRepository.save(product);
     }
 
     public Product findById(Long id) {
@@ -105,11 +108,23 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found with id " + id));
     }
 
+    @Transactional
     public void deleteProductImage(Long imageId) {
+        ProductImage image = productImageRepository.findById(imageId)
+                .orElseThrow(() -> new RuntimeException("Image not found with id " + imageId));
+        Product product = image.getProduct();
+        if (product != null) {
+            product.getImages().remove(image);
+            productRepository.save(product);
+        }
         productImageRepository.deleteById(imageId);
     }
 
     public void deleteById(Long id) {
         productRepository.deleteById(id);
+    }
+
+    public Product findBySku(String sku) {
+        return productRepository.findBySku(sku);
     }
 }

@@ -1,9 +1,11 @@
 package com.ecommerce.api.controller.admin;
 
+import com.ecommerce.api.converter.ProductImageConverter;
 import com.ecommerce.api.model.Product;
 import com.ecommerce.api.model.ProductImage;
 import com.ecommerce.api.service.CategoryService;
 import com.ecommerce.api.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,12 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.io.IOException;
-import java.util.List;
 
 @Controller
 @RequestMapping("/admin/products")
@@ -37,10 +37,10 @@ public class AdminProductController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long categoryId,
             Model model) {
-        
+
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Product> productPage;
-        
+
         if (search != null && !search.isEmpty()) {
             productPage = productService.searchProducts(search, pageRequest);
         } else if (categoryId != null) {
@@ -76,31 +76,56 @@ public class AdminProductController {
 
     @PostMapping("/create")
     public String createProduct(
-            @ModelAttribute Product product,
-            @RequestParam("categoryId") Long categoryId,
-            @RequestParam("images") MultipartFile[] images,
+            @ModelAttribute("product") Product product,
+            @RequestParam(value = "images", required = false) MultipartFile[] images,
+            BindingResult bindingResult,
+            Model model,
             RedirectAttributes redirectAttributes) {
-        
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryService.findAll(PageRequest.of(0, 100)).getContent());
+            model.addAttribute("error", "Please correct the form errors");
+            return "admin/products/form";
+        }
+
         try {
-            product.setCategory(categoryService.findById(categoryId));
+            // Validate SKU uniqueness
+            if (productService.findBySku(product.getSku()) != null) {
+                model.addAttribute("categories", categoryService.findAll(PageRequest.of(0, 100)).getContent());
+                model.addAttribute("error", "A product with this SKU already exists");
+                return "admin/products/form";
+            }
+
+            // Validate and set category
+            if (product.getCategory() != null && product.getCategory().getId() != null) {
+                product.setCategory(categoryService.findById(product.getCategory().getId()));
+            } else {
+                model.addAttribute("categories", categoryService.findAll(PageRequest.of(0, 100)).getContent());
+                model.addAttribute("error", "Category is required");
+                return "admin/products/form";
+            }
             Product savedProduct = productService.save(product);
-            
+
+            // Process images separately from the product binding
+            ProductImageConverter converter = new ProductImageConverter();
             if (images != null && images.length > 0) {
                 for (MultipartFile image : images) {
                     if (!image.isEmpty()) {
                         try {
-                            ProductImage productImage = convertToProductImage(image);
-                            productService.addProductImage(savedProduct, productImage);
-                        } catch (IOException ex) {
+                            ProductImage productImage = converter.convert(image);
+                            if (productImage != null) {
+                                productService.addProductImage(savedProduct, productImage);
+                            }
+                        } catch (Exception ex) {
                             redirectAttributes.addFlashAttribute("error", "Failed to process image " + image.getOriginalFilename() + ": " + ex.getMessage());
                         }
                     }
                 }
             }
-            
+
             redirectAttributes.addFlashAttribute("success", "Product created successfully");
             return "redirect:/admin/products";
-            
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to create product: " + e.getMessage());
             return "redirect:/admin/products/new";
@@ -110,35 +135,62 @@ public class AdminProductController {
     @PostMapping("/{id}/update")
     public String updateProduct(
             @PathVariable Long id,
-            @ModelAttribute Product product,
-            @RequestParam("categoryId") Long categoryId,
+            @Valid @ModelAttribute("product") Product product,
+            BindingResult bindingResult,
             @RequestParam(value = "images", required = false) MultipartFile[] images,
+            Model model,
             RedirectAttributes redirectAttributes) {
-        
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryService.findAll(PageRequest.of(0, 100)).getContent());
+            model.addAttribute("error", "Please correct the errors below");
+            return "admin/products/form";
+        }
+
         try {
+            // Validate SKU uniqueness, but allow the same SKU for the same product
+            Product existingProductWithSku = productService.findBySku(product.getSku());
+            if (existingProductWithSku != null && !existingProductWithSku.getId().equals(id)) {
+                model.addAttribute("categories", categoryService.findAll(PageRequest.of(0, 100)).getContent());
+                model.addAttribute("error", "A product with this SKU already exists");
+                return "admin/products/form";
+            }
+
+            // Validate and set category
+            if (product.getCategory() != null && product.getCategory().getId() != null) {
+                product.setCategory(categoryService.findById(product.getCategory().getId()));
+            } else {
+                model.addAttribute("categories", categoryService.findAll(PageRequest.of(0, 100)).getContent());
+                model.addAttribute("error", "Category is required");
+                return "admin/products/form";
+            }
+
+            // Get existing product to preserve images
             Product existingProduct = productService.findById(id);
-            product.setId(id);
-            product.setCategory(categoryService.findById(categoryId));
             product.setImages(existingProduct.getImages()); // Preserve existing images
-            
+
             Product updatedProduct = productService.save(product);
-            
+
+            // Process images separately from the product binding
+            ProductImageConverter converter = new ProductImageConverter();
             if (images != null && images.length > 0) {
                 for (MultipartFile image : images) {
                     if (!image.isEmpty()) {
                         try {
-                            ProductImage productImage = convertToProductImage(image);
-                            productService.addProductImage(updatedProduct, productImage);
-                        } catch (IOException ex) {
+                            ProductImage productImage = converter.convert(image);
+                            if (productImage != null) {
+                                productService.addProductImage(updatedProduct, productImage);
+                            }
+                        } catch (Exception ex) {
                             redirectAttributes.addFlashAttribute("error", "Failed to process image " + image.getOriginalFilename() + ": " + ex.getMessage());
                         }
                     }
                 }
             }
-            
+
             redirectAttributes.addFlashAttribute("success", "Product updated successfully");
             return "redirect:/admin/products";
-            
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to update product: " + e.getMessage());
             return "redirect:/admin/products/" + id + "/edit";
@@ -165,13 +217,5 @@ public class AdminProductController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to delete image: " + e.getMessage());
         }
-    }
-
-    private ProductImage convertToProductImage(MultipartFile file) throws IOException {
-        ProductImage productImage = new ProductImage();
-        productImage.setFileName(file.getOriginalFilename());
-        productImage.setContentType(file.getContentType());
-        productImage.setData(file.getBytes());
-        return productImage;
     }
 }

@@ -19,12 +19,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,23 +44,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers,
             HttpStatus status,
             WebRequest request) {
-        
+
         Map<String, Object> body = new HashMap<>();
         body.put("status", status.value());
         body.put("error", "Validation Error");
-        
+
         // Get all validation errors
         Map<String, String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .collect(Collectors.toMap(
-                    FieldError::getField,
-                    FieldError::getDefaultMessage,
-                    (error1, error2) -> error1 + ", " + error2
+                        FieldError::getField,
+                        FieldError::getDefaultMessage,
+                        (error1, error2) -> error1 + ", " + error2
                 ));
-        
+
         body.put("errors", errors);
-        
+
         return new ResponseEntity<>(body, headers, status);
     }
 
@@ -64,10 +68,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * Handle authentication exceptions
      */
     @ExceptionHandler({
-        AuthenticationException.class,
-        BadCredentialsException.class,
-        DisabledException.class,
-        LockedException.class
+            AuthenticationException.class,
+            BadCredentialsException.class,
+            DisabledException.class,
+            LockedException.class
     })
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<Object> handleAuthenticationException(Exception ex) {
@@ -75,7 +79,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", HttpStatus.UNAUTHORIZED.value());
         body.put("error", "Authentication Error");
         body.put("message", ex.getMessage());
-        
+
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
@@ -83,10 +87,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * Handle JWT related exceptions
      */
     @ExceptionHandler({
-        ExpiredJwtException.class,
-        MalformedJwtException.class,
-        SignatureException.class,
-        IllegalArgumentException.class
+            ExpiredJwtException.class,
+            MalformedJwtException.class,
+            SignatureException.class,
+            IllegalArgumentException.class
     })
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<Object> handleJwtException(Exception ex) {
@@ -94,7 +98,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", HttpStatus.UNAUTHORIZED.value());
         body.put("error", "JWT Token Error");
         body.put("message", ex.getMessage());
-        
+
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
@@ -108,7 +112,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", HttpStatus.FORBIDDEN.value());
         body.put("error", "Access Denied");
         body.put("message", ex.getMessage());
-        
+
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
@@ -122,7 +126,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", HttpStatus.NOT_FOUND.value());
         body.put("error", "Resource Not Found");
         body.put("message", ex.getMessage());
-        
+
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
@@ -135,18 +139,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, Object> body = new HashMap<>();
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Validation Error");
-        
+
         // Get all constraint violations
         Map<String, String> errors = ex.getConstraintViolations()
                 .stream()
                 .collect(Collectors.toMap(
-                    violation -> violation.getPropertyPath().toString(),
-                    violation -> violation.getMessage(),
-                    (error1, error2) -> error1 + ", " + error2
+                        violation -> violation.getPropertyPath().toString(),
+                        violation -> violation.getMessage(),
+                        (error1, error2) -> error1 + ", " + error2
                 ));
-        
+
         body.put("errors", errors);
-        
+
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
@@ -159,7 +163,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", HttpStatus.UNAUTHORIZED.value());
         body.put("error", "Session Error");
         body.put("message", ex.getMessage());
-        
+
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
@@ -171,17 +175,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleAllUncaughtException(Exception ex, WebRequest request) {
         // Generate a unique error ID for tracking
         String errorId = UUID.randomUUID().toString();
-        
+
         // Log the error with the generated ID
         logger.error("Error ID: {} - Uncaught exception: {}", errorId, ex.getMessage(), ex);
-        
+
         Map<String, Object> body = new HashMap<>();
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         body.put("error", "Internal Server Error");
         body.put("message", "An unexpected error occurred");
         body.put("errorId", errorId);
         body.put("timestamp", System.currentTimeMillis());
-        
+
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -207,12 +211,54 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleMaxUploadSizeExceededException(
             org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
         return new ResponseEntity<>(
-            createErrorResponse(
-                "File Upload Error",
-                "File size exceeds maximum allowed size",
+                createErrorResponse(
+                        "File Upload Error",
+                        "File size exceeds maximum allowed size",
+                        HttpStatus.BAD_REQUEST
+                ),
                 HttpStatus.BAD_REQUEST
-            ),
-            HttpStatus.BAD_REQUEST
+        );
+    }
+
+    /**
+     * Handle type mismatch exceptions for file uploads
+     */
+//    @ExceptionHandler(TypeMismatchException.class)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    public ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex) {
+//        if (ex.getValue() instanceof MultipartFile && ex.getRequiredType().equals(Set.class)) {
+//            return new ResponseEntity<>(
+//                    createErrorResponse(
+//                            "File Upload Error",
+//                            "Failed to process uploaded images. Please ensure you're uploading valid image files.",
+//                            HttpStatus.BAD_REQUEST
+//                    ),
+//                    HttpStatus.BAD_REQUEST
+//            );
+//        }
+//        return new ResponseEntity<>(
+//                createErrorResponse(
+//                        "Validation Error",
+//                        "Invalid data format: " + ex.getMessage(),
+//                        HttpStatus.BAD_REQUEST
+//                ),
+//                HttpStatus.BAD_REQUEST
+//        );
+//    }
+
+    /**
+     * Handle IO exceptions during file processing
+     */
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<Object> handleIOException(IOException ex) {
+        return new ResponseEntity<>(
+                createErrorResponse(
+                        "File Processing Error",
+                        "Failed to process file: " + ex.getMessage(),
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                ),
+                HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
 }
