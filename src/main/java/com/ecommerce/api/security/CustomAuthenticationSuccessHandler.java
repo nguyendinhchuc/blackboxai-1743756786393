@@ -4,6 +4,7 @@ import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.UserSession;
 import com.ecommerce.api.service.UserDetailsServiceImpl;
 import com.ecommerce.api.service.UserSessionService;
+import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +44,19 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             User user = userDetailsService.getCurrentUser();
             UserSession session = userSessionService.createSession(user, request);
             userSessionService.markSessionAsCurrent(session);
+
+            // Generate JWT token
+            String jwtToken = userDetailsService.getJwtTokenProvider().generateToken(authentication);
+
+            // Set JWT token in HttpOnly cookie
+            Cookie jwtCookie = new Cookie("JWT_TOKEN", jwtToken);
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(60 * 60 * 24); // 1 day expiration
+            response.addCookie(jwtCookie);
+
         } catch (Exception e) {
-            logger.error("Failed to create user session", e);
+            logger.error("Failed to create user session or set JWT token", e);
         }
 
         // Handle redirect

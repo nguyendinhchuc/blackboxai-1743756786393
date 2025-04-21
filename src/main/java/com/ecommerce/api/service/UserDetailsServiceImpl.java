@@ -13,8 +13,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.ecommerce.api.security.JwtTokenProvider;
+
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    public JwtTokenProvider getJwtTokenProvider() {
+        return jwtTokenProvider;
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 

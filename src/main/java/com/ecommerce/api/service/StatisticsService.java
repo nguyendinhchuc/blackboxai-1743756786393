@@ -5,6 +5,11 @@ import com.ecommerce.api.model.Payment;
 import com.ecommerce.api.model.Product;
 import com.ecommerce.api.repository.PaymentRepository;
 import com.ecommerce.api.repository.ProductRepository;
+import com.ecommerce.api.repository.UserRepository;
+import com.ecommerce.api.model.RoleEnum;
+import com.ecommerce.api.interceptor.TenantContext;
+import com.ecommerce.api.model.Payment;
+import com.ecommerce.api.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -103,7 +108,7 @@ public class StatisticsService {
     public Map<String, Object> getInventoryStatistics() {
         Long tenantId = TenantContext.getCurrentTenant().getId();
         List<Product> products = productRepository.findByTenantId(tenantId);
-
+        Map<String, Object> statistics = new HashMap<>();
         // Calculate inventory statistics
         int totalProducts = products.size();
         int lowStockProducts = (int) products.stream()
@@ -149,8 +154,8 @@ public class StatisticsService {
     public Map<String, Object> getUserStatistics() {
         Long tenantId = TenantContext.getCurrentTenant().getId();
         long totalUsers = userRepository.count();
-        long adminUsers = userRepository.countByRole_Name(com.ecommerce.api.model.RoleEnum.ADMIN);
-        long customerUsers = userRepository.countByRole_Name(com.ecommerce.api.model.RoleEnum.CUSTOMER);
+        long adminUsers = userRepository.countByRole_Name(RoleEnum.ROLE_ADMIN);
+        long customerUsers = userRepository.countByRole_Name(RoleEnum.ROLE_USER);
 
         Map<String, Object> statistics = new HashMap<>();
         statistics.put("totalUsers", totalUsers);
@@ -183,5 +188,4 @@ public class StatisticsService {
 
         return statistics;
     }
-}
 }

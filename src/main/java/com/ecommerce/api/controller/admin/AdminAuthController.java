@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-@RequestMapping("/admin")
+@RequestMapping("/")
 public class AdminAuthController {
 
     private UserDetailsServiceImpl userDetailsService;
@@ -53,14 +53,13 @@ public class AdminAuthController {
 
         if (logout != null) {
             model.addAttribute("message", "You have been logged out successfully.");
+            model.addAttribute("message", "You have been logged out successfully.");
         }
 
         // Check if user is already logged in
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            // Call init method to perform dashboard calculations after login
-            init();
-            return "redirect:/admin";
+            return "redirect:/dashboard";
         }
 
         return "admin/login";

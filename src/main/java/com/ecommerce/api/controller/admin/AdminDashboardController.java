@@ -9,9 +9,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Map;
+
 @Controller
-@RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@RequestMapping("/dashboard")
+//@PreAuthorize("hasRole('ADMIN')")
 public class AdminDashboardController {
 
     @Autowired
@@ -67,8 +69,8 @@ public class AdminDashboardController {
         return "admin/dashboard/index";
     }
 
-    @GetMapping("/dashboard")
-    public String redirectToDashboard() {
-        return "redirect:/admin";
-    }
+//    @GetMapping("/dashboard")
+//    public String redirectToDashboard() {
+//        return "redirect:/admin";
+//    }
 }

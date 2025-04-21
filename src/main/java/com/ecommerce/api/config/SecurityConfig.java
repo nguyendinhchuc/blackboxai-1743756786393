@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -41,22 +42,24 @@ public class SecurityConfig {
     @Autowired
     private CustomLogoutSuccessHandler logoutSuccessHandler;
 
-    protected void configureAuthenticationManager(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
-    protected void configureHttpSecurity(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors().and().csrf().disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false)
-                .expiredUrl("/admin/login?expired=true")
-                .and()
-                .invalidSessionUrl("/admin/login?invalid=true")
-                .and()
-                .authorizeRequests()
+            .cors().and().csrf().disable()
+//            .sessionManagement()
+//                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+//                .maximumSessions(1)
+//                .maxSessionsPreventsLogin(false)
+//                .expiredUrl("/login?expired=true")
+//                .and()
+//                .invalidSessionUrl("/login?invalid=true")
+//                .and()
+            .authorizeRequests()
                 // Public routes
                 .requestMatchers("/", "/home", "/about").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
@@ -67,7 +70,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                 // Admin routes
-                .requestMatchers("/admin/login", "/admin/logout").permitAll()
+                .requestMatchers("/login", "/logout").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
                 // API routes
@@ -78,37 +81,34 @@ public class SecurityConfig {
                 // Secure all other routes
                 .anyRequest().authenticated()
                 .and()
-                .formLogin()
-                .loginPage("/admin/login")
-                .loginProcessingUrl("/admin/login")
+            .formLogin()
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
                 .successHandler(authenticationSuccessHandler)
                 .failureHandler(authenticationFailureHandler)
                 .permitAll()
                 .and()
-                .logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/admin/logout"))
+            .logout()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 .logoutSuccessHandler(logoutSuccessHandler)
                 .deleteCookies("JSESSIONID", "remember-me")
                 .clearAuthentication(true)
                 .invalidateHttpSession(true)
                 .permitAll()
                 .and()
-                .rememberMe()
+            .rememberMe()
                 .key("uniqueAndSecret")
                 .tokenValiditySeconds(86400) // 1 day
                 .rememberMeParameter("remember-me")
                 .userDetailsService(userDetailsService)
                 .and()
-                .exceptionHandling()
-                .accessDeniedPage("/admin/access-denied");
+            .exceptionHandling()
+                .accessDeniedPage("/access-denied");
 
         // Add JWT filter
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-    }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+        return http.build();
     }
 
     @Bean
